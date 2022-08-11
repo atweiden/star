@@ -173,6 +173,13 @@ subset LvmVolumeGroupName of Str is export where
     Star::Grammar.parse($_, :rule<lvm-vg-name>);
 }
 
+#| C<TimeZone> represents a "Region/City" found in C</usr/share/zoneinfo>,
+#| or UTC.
+subset TimeZone of Str is export where
+{
+    is-time-zone($_);
+}
+
 #| C<UserName> is a valid Linux user account name.
 subset UserName of Str is export where
 {
@@ -219,6 +226,30 @@ subset VaultName of Str is export where
 subset VaultPass of Str is export where { 0 < .chars <= 512 };
 
 =head2 Helper functions
+
+multi sub is-time-zone(
+    # Optimization.
+    Str:D $ where 'UTC'
+    --> Bool:D
+)
+{
+    my Bool:D $is-time-zone = True;
+}
+
+multi sub is-time-zone(
+    # Disqualify words with lowercase first letter to rule out
+    # C<zoneinfo.tab> and the like.
+    Str:D $ where /^ <upper> ** 1/ && "/usr/share/zoneinfo/$_".IO.f.so
+    --> Bool:D
+)
+{
+    my Bool:D $is-time-zone = True;
+}
+
+multi sub is-time-zone(Str $ --> Bool:D)
+{
+    my Bool:D $is-time-zone = False;
+}
 
 multi sub rootpart(IO:D $path where $path.parent eq '/'.IO --> IO:D)
 {
