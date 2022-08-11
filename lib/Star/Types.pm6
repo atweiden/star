@@ -158,7 +158,7 @@ enum VaultType is export <
 #| C<AbsolutePath> represents an absolute path in C<Str> representation.
 subset AbsolutePath of Str is export where .defined && .IO.is-absolute.so;
 
-#| C<AbsolutePath> represents a relative path in C<Str> representation.
+#| C<RelativePath> represents a relative path in C<Str> representation.
 subset RelativePath of Str is export where .defined && .IO.is-relative.so;
 
 #| C<Hostname> is a valid hostname for identification on a network.

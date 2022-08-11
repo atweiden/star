@@ -10,7 +10,8 @@ unit module Star::Constants;
     constant $SECRET-PREFIX-VAULT = '/boot';
 
     #| C<$SECRET-PREFIX-BOOTVAULT> is the directory in which Bootvault
-    #| key files are stored, for use with 1FA and 2FA modes.
+    #| key files are stored, for use with C<SecurityMode::1FA> and
+    #| C<SecurityMode::2FA>.
     constant $SECRET-PREFIX-BOOTVAULT = '/root';
 
     #| C<$DIRECTORY-EFI> is the mounting point of the EFI System
@@ -55,7 +56,7 @@ unit module Star::Constants;
     constant $GDISK-SIZE-EFI = '550M';
 
     #| C<$GDISK-SIZE-BOOT> is the size of the C</boot> partition, for
-    #| use with 1FA and 2FA modes.
+    #| use with C<SecurityMode::1FA> and C<SecurityMode::2FA>.
     constant $GDISK-SIZE-BOOT = '1024M';
 
     #| C<$GDISK-TYPECODE-BIOS> is the gdisk internal code for the BIOS
