@@ -1,0 +1,33 @@
+todo
+====
+
+configuration
+-------------
+
+- move all config attribute default/fallback prompt logic into separate
+  function
+  - e.g.
+    - |     # before
+      |     has UserName:D $.user-name-admin =
+      |         %*ENV<STAR_ADMIN_NAME>
+      |             ?? gen-user-name(%*ENV<STAR_ADMIN_NAME>)
+      |             !! prompt-name(:user, :admin);
+      |
+      |     # after
+      |     has UserName:D $.user-name-admin is required;
+
+development
+-----------
+
+- rename `DiskType $.disk-type` -> `DriveType $.drive-type`
+- rename `HostName $.host-name` -> `Hostname $.hostname`
+- rename `Mode` -> `SecurityMode`
+  - add `enum DiskEncryption <NONE HALF FULL>`
+- rename `Timezone $.timezone` -> `TimeZone $.time-zone`
+- handle new enum `Star::Types::{DriveType, Graphics, Libc, Processor, VaultType}`
+  - also newly untyped `Star::Types::{Keymap, Locale, TimeZone}`
+
+documentation
+-------------
+
+- rewrite readme
