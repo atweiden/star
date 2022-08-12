@@ -129,7 +129,8 @@ enum DmCryptMode is export <
 #|
 #| =for item
 #| C<BOTH>: Encrypt both the root volume or partition in addition to
-#| C</boot>. C</boot> may or may not reside on a separate partition (see: ).
+#| C</boot>. C</boot> may or may not reside on a separate partition
+#| (see: C<BootSecurityLevel>).
 #|
 #| N.B. C<BOOT> and C<BOTH> require selecting the GRUB bootloader.
 #| Currently, no other bootloader supports booting from an encrypted

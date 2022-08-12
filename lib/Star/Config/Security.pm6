@@ -53,7 +53,7 @@ role Star::Config::Security[Mode:D :mode($)! where Mode::BASE]
     #| See: C<man cryptsetup>.
     has Str:D $.vault-key-size is required;
 
-    #| <$.vault-offset> is the start offset in The Vault backend device.
+    #| C<$.vault-offset> is the start offset in The Vault backend device.
     #|
     #| N.B. This value must be given in human-readable format, e.g. C<5G>.
     #| This differs from the behaviour of I<cryptsetup>, which requires
@@ -63,7 +63,7 @@ role Star::Config::Security[Mode:D :mode($)! where Mode::BASE]
     #| See: C<man cryptsetup>, and C<gen-cryptsetup-luks-offset>.
     has Str $.vault-offset;
 
-    #| <$.vault-sector-size> is the sector size in bytes for use with
+    #| C<$.vault-sector-size> is the sector size in bytes for use with
     #| The Vault.
     #|
     #| See: C<man cryptsetup>.
@@ -126,7 +126,7 @@ role Star::Config::Security[Mode:D :mode($)! where Mode::<1FA>]
     #| See: C<man cryptsetup>.
     has Str:D $.bootvault-key-size is required;
 
-    #| <$.bootvault-offset> is the start offset in The Bootvault backend
+    #| C<$.bootvault-offset> is the start offset in The Bootvault backend
     #| device.
     #|
     #| N.B. This value must be given in human-readable format, e.g. C<5G>.
@@ -137,8 +137,8 @@ role Star::Config::Security[Mode:D :mode($)! where Mode::<1FA>]
     #| See: C<man cryptsetup>, and C<gen-cryptsetup-luks-offset>.
     has Str $.bootvault-offset;
 
-    #| <$.bootvault-sector-size> is the sector size in bytes for use
-    #| with The Bootvault.
+    #| C<$.bootvault-sector-size> is the sector size in bytes for use with
+    #| The Bootvault.
     #|
     #| See: C<man cryptsetup>.
     has Str $.bootvault-sector-size;
