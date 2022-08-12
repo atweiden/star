@@ -5,6 +5,26 @@ unit module Star::Constants;
 
 =head2 Constants for installer
 
+    #| C<$DIRECTORY-EFI> is the mounting point of the EFI System
+    #| Partition.
+    constant $DIRECTORY-EFI = '/boot/efi';
+
+    #| C<$DIRECTORY-KEYMAPS> is the directory within which keymaps can
+    #| be found.
+    constant $DIRECTORY-KEYMAPS = '/usr/share/kbd/keymaps';
+
+    #| C<$DIRECTORY-LOCALES> is the directory within which locales can
+    #| be found.
+    constant $DIRECTORY-LOCALES = '/usr/share/i18n/locales';
+
+    #| C<$DIRECTORY-TIME-ZONES> is the directory within which time zones
+    #| can be found.
+    constant $DIRECTORY-TIME-ZONES = '/usr/share/zoneinfo';
+
+    #| C<$FILE-TIME-ZONES> is the file containing I<tzdb> time zone
+    #| descriptions.
+    constant $FILE-TIME-ZONES = "$DIRECTORY-TIME-ZONES/zone1970.tab";
+
     #| C<$SECRET-PREFIX-VAULT> is the directory in which Vault key files
     #| and detached headers are stored.
     constant $SECRET-PREFIX-VAULT = '/boot';
@@ -13,18 +33,6 @@ unit module Star::Constants;
     #| key files are stored, for use with C<SecurityMode::1FA> and
     #| C<SecurityMode::2FA>.
     constant $SECRET-PREFIX-BOOTVAULT = '/root';
-
-    #| C<$DIRECTORY-EFI> is the mounting point of the EFI System
-    #| Partition.
-    constant $DIRECTORY-EFI = '/boot/efi';
-
-    #| C<$DIRECTORY-LOCALE> is the directory within which locales can
-    #| be found.
-    constant $DIRECTORY-LOCALE = '/usr/share/i18n/locales';
-
-    #| C<$DIRECTORY-TIME-ZONE> is the directory within which time zones
-    #| can be found.
-    constant $DIRECTORY-TIME-ZONE = '/usr/share/zoneinfo';
 
 =head2 Constants for I<libcrypt>
 
