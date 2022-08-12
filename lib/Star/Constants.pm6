@@ -18,6 +18,14 @@ unit module Star::Constants;
     #| Partition.
     constant $DIRECTORY-EFI = '/boot/efi';
 
+    #| C<$DIRECTORY-LOCALE> is the directory within which locales can
+    #| be found.
+    constant $DIRECTORY-LOCALE = '/usr/share/i18n/locales';
+
+    #| C<$DIRECTORY-TIME-ZONE> is the directory within which time zones
+    #| can be found.
+    constant $DIRECTORY-TIME-ZONE = '/usr/share/zoneinfo';
+
 =head2 Constants for I<libcrypt>
 
     #| C<$CRYPT-ROUNDS> is the number of libcrypt crypt encryption rounds.
