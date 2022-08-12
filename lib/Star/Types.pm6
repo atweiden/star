@@ -1,5 +1,6 @@
 use v6;
 use Star::Constants;
+use Star::System::Utils;
 unit module Star::Types;
 
 =head2 Enums
@@ -233,65 +234,16 @@ subset VaultPass of Str is export where { 0 < .chars <= 512 };
 
 =head2 Helper functions
 
-sub gen-path(Str:D $a, Str:D $b --> Str:D)
-{
-    my Str:D $path = sprintf('%s/%s', $a, $b);
-}
+multi sub is-keymap(Str:D $ where Star::System::Utils.ls-keymaps.grep($_) --> True) {*}
+multi sub is-keymap(Str $ --> False) {*}
 
-multi sub is-locale(Str:D $ where locale-path($_).IO.f.so --> Bool:D)
-{
-    my Bool:D $is-locale = True;
-}
+multi sub is-locale(Str:D $ where Star::System::Utils.ls-locales.grep($_) --> True) {*}
+multi sub is-locale(Str $ --> False) {*}
 
-multi sub is-locale(Str $ --> Bool:D)
-{
-    my Bool:D $is-locale = False;
-}
+multi sub is-time-zone(Str:D $ where Star::System::Utils.ls-time-zones.grep($_) --> True) {*}
+multi sub is-time-zone(Str $ --> False) {*}
 
-sub locale-path(Str:D $locale --> Str:D)
-{
-    my Str:D $locale-path =
-        gen-path($Star::Constants::DIRECTORY-LOCALE, $locale);
-}
-
-multi sub is-time-zone(
-    # Optimization.
-    Str:D $ where 'UTC'
-    --> Bool:D
-)
-{
-    my Bool:D $is-time-zone = True;
-}
-
-multi sub is-time-zone(
-    # Disqualify words with lowercase first letter to filter out
-    # C<zoneinfo.tab> and the like.
-    Str:D $ where /^ <upper> ** 1/ && time-zone-path($_).IO.f.so
-    --> Bool:D
-)
-{
-    my Bool:D $is-time-zone = True;
-}
-
-multi sub is-time-zone(Str $ --> Bool:D)
-{
-    my Bool:D $is-time-zone = False;
-}
-
-sub time-zone-path(Str:D $time-zone --> Str:D)
-{
-    my Str:D $time-zone-path =
-        gen-path($Star::Constants::DIRECTORY-TIME-ZONE, $time-zone);
-}
-
-multi sub rootpart(IO:D $path where $path.parent eq '/'.IO --> IO:D)
-{
-    my IO:D $rootpart = $path;
-}
-
-multi sub rootpart(IO:D $path --> IO:D)
-{
-    my IO:D $rootpart = rootpart($path.parent);
-}
+multi sub rootpart(IO:D $path where $path.parent eq '/'.IO --> IO:D) { $path }
+multi sub rootpart(IO:D $path --> IO:D) { rootpart($path.parent) }
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
