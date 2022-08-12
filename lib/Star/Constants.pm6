@@ -30,8 +30,9 @@ unit module Star::Constants;
     constant $SECRET-PREFIX-VAULT = '/boot';
 
     #| C<$SECRET-PREFIX-BOOTVAULT> is the directory in which Bootvault
-    #| key files are stored, for use with C<SecurityMode::1FA> and
-    #| C<SecurityMode::2FA>.
+    #| key files are stored, for use with either C<DmCryptTarget::BOOT>,
+    #| C<DmCryptTarget::BOTH> plus C<BootSecurityLevel::<1FA>> or
+    #| C<BootSecurityLevel::<2FA>>, or C<DiskEncryption::FILESYSTEM>.
     constant $SECRET-PREFIX-BOOTVAULT = '/root';
 
 =head2 Constants for I<libcrypt>
@@ -72,7 +73,9 @@ unit module Star::Constants;
     constant $GDISK-SIZE-EFI = '550M';
 
     #| C<$GDISK-SIZE-BOOT> is the size of the C</boot> partition, for
-    #| use with C<SecurityMode::1FA> and C<SecurityMode::2FA>.
+    #| use with either C<DmCryptTarget::BOOT>, C<DmCryptTarget::BOTH>
+    #| plus C<BootSecurityLevel::<1FA>> or C<BootSecurityLevel::<2FA>>,
+    #| or C<DiskEncryption::FILESYSTEM>.
     constant $GDISK-SIZE-BOOT = '1024M';
 
     #| C<$GDISK-TYPECODE-BIOS> is the gdisk internal code for the BIOS

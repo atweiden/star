@@ -21,11 +21,9 @@ development
 
 - rename `DiskType $.disk-type` -> `DriveType $.drive-type`
 - rename `HostName $.host-name` -> `Hostname $.hostname`
-- rename `Mode` -> `SecurityMode`
-  - add `enum DiskEncryption <NONE HALF FULL>`
+- handle `Mode` -> `DiskEncryption`, `DmCryptTarget`, `BootSecurityLevel`
 - rename `Timezone $.timezone` -> `TimeZone $.time-zone`
 - handle new enum `Star::Types::{DriveType, Graphics, Libc, Processor, VaultType}`
-  - also newly untyped `Star::Types::{Keymap, Locale, TimeZone}`
 
 documentation
 -------------

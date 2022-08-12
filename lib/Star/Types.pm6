@@ -5,6 +5,69 @@ unit module Star::Types;
 
 =head2 Enums
 
+#| C<BootSecurityLevel> is an enum whose variants represent the different
+#| boot security levels supported by Star.
+#|
+#| =for item1
+#| C<BASE>: One or two encrypted partitions on single device, boot, root,
+#| or both. When C</boot> is stored outside the root partition, it and/or
+#| the root partition may be encrypted (see: C<DmCryptTarget>). When
+#| C</boot> is stored inside the root partition, C</boot> is encrypted
+#| alongside the rest of the system.
+#|
+#| =begin item1
+#|
+#| C<1FA>: Mostly for development purposes. Only for use with
+#| C<DiskEncryption::DMCRYPT> and either C<DmCryptTarget::ROOT> or
+#| C<DmCryptTarget::BOTH>.
+#|
+#| Two partitions on single device, one root partition, one boot
+#| partition. Root partition encrypted and headerless, its header detached
+#| and stored in boot partition as applicable. Boot partition may or
+#| may not be encrypted.
+#|
+#| =end item1
+#|
+#| =for item1
+#| C<2FA>: Implementation depends on C<DiskEncryption> mode and
+#| C<DmCryptTarget>.
+#|
+#| =begin item2
+#|
+#| With C<DiskEncryption::DMCRYPT> and C<DmCryptTarget::BOOT>: An
+#| external drive connected via USB port acts as the second factor.
+#| C</boot> is encrypted and stored in the external drive. Alternatively,
+#| a secret key stored on external hardware is used to decrypt C</boot>.
+#|
+#| With C<DiskEncryption::BOTH> and C<DmCryptTarget::BOOT>: Same as the
+#| above, additionally decrypting the filesystem.
+#|
+#| With C<DiskEncryption::DMCRYPT> and either C<DmCryptTarget::ROOT>
+#| or C<DmCryptTarget::BOTH>: An external drive connected via USB port
+#| acts as the second factor. C</boot> is stored in the external drive
+#| either encrypted or unencrypted, depending. The root volume is
+#| encrypted and headerless, its header detached and stored in boot
+#| partition as applicable. Alternatively, a secret key stored on
+#| external hardware is used to decrypt the boot and root partitions.
+#|
+#| With C<DiskEncryption::BOTH> and either C<DmCryptTarget::ROOT> or
+#| C<DmCryptTarget::BOTH>: Same as the above, additionally decrypting
+#| the filesystem.
+#|
+#| With C<DiskEncryption::FILESYSTEM>: A secret key stored on external
+#| hardware is used to decrypt the filesystem.
+#|
+#| =end item2
+#|
+#| C<BootSecurityLevel> is only relevant when disk encryption is used,
+#| either C<DiskEncryption::DMCRYPT>, C<DiskEncryption::FILESYSTEM>, or
+#| C<DiskEncryption::BOTH>.
+enum BootSecurityLevel is export <
+    BASE
+    1FA
+    2FA
+>;
+
 #| C<DeviceLocator> is an enum whose variants represent the different
 #| identifiers by which a target device can be located.
 #|
@@ -20,16 +83,53 @@ enum DeviceLocator is export <
 #| C<DiskEncryption> is an enum whose variants represent the different
 #| disk encryption modes supported by Star.
 #|
-#| =item C<NONE>: Disable full disk encryption
-#| =item C<HALF>: Enable full disk encryption, C</boot> excepted
-#| =item C<FULL>: Enable full disk encryption, C</boot> included
+#| =for item
+#| C<NONE>: Disable disk encryption.
 #|
-#| N.B. C<FULL> requires selecting the GRUB bootloader. Currently,
-#| no other bootloader supports booting from an encrypted C</boot>.
+#| =for item
+#| C<DMCRYPT>: Enable disk encryption via the dm-crypt kernel crypto
+#| API. Uses I<cryptsetup>. Can be used to encrypt C</boot>.
+#|
+#| =for item
+#| C<FILESYSTEM>: Enable disk encryption via the filesystem's native
+#| encryption implementation. Only available for C<Filesystem::EXT4>
+#| and C<Filesystem::F2FS>. Can't be used to encrypt C</boot>.
+#|
+#| =for item
+#| C<BOTH>: Enable disk encryption both via the dm-crypt kernel crypto
+#| API and the filesystem's native encryption implementation. Only
+#| available for C<Filesystem::EXT4> and C<Filesystem::F2FS>. May be used
+#| to encrypt boot partition via dm-crypt while encrypting root partition
+#| via the filesystem's native encryption implementation.
 enum DiskEncryption is export <
     NONE
-    HALF
-    FULL
+    DMCRYPT
+    FILESYSTEM
+    BOTH
+>;
+
+#| C<DmCryptTarget> is an enum whose variants represent the different
+#| targets for encryption via the dm-crypt kernel crypto API.
+#|
+#| =for item
+#| C<ROOT>: Only encrypt the root volume or partition. C</boot> will
+#| be unencrypted.
+#|
+#| =for item
+#| C<BOOT>: Only encrypt the boot partition. The root partition will
+#| be unencrypted.
+#|
+#| =for item
+#| C<BOTH>: Encrypt both the root volume or partition in addition to
+#| C</boot>. C</boot> may or may not reside on a separate partition (see: ).
+#|
+#| N.B. C<BOOT> and C<BOTH> require selecting the GRUB bootloader.
+#| Currently, no other bootloader supports booting from an encrypted
+#| C</boot>.
+enum DmCryptTarget is export <
+    ROOT
+    BOOT
+    BOTH
 >;
 
 #| C<Distro> is an enum whose variants represent the different Linux
@@ -110,33 +210,6 @@ enum Libc is export <
 enum Processor is export <
     AMD
     INTEL
->;
-
-#| C<SecurityMode> is an enum whose variants represent the different
-#| security modes supported by Star.
-#|
-#| =for item
-#| C<BASE>: One encrypted partition on single device. Unencrypted boot
-#| partition on same device optional (see: C<DiskEncryption>).
-#|
-#| =for item
-#| C<1FA>: Two partitions on single device, one root partition, one boot
-#| partition. Root partition encrypted and headerless, its header detached
-#| and stored in boot partition as applicable. Boot partition encryption
-#| optional (see: C<DiskEncryption>).
-#|
-#| =for item
-#| C<2FA>: Root volume encrypted and headerless on unpartitioned device,
-#| its header detached and stored in boot partition as applicable. Boot
-#| partition on separate device. Boot partition encryption optional
-#| (see: C<DiskEncryption>).
-#|
-#| C<SecurityMode> is only relevant when disk encryption is used. See:
-#| C<DiskEncryption>.
-enum SecurityMode is export <
-    BASE
-    1FA
-    2FA
 >;
 
 #| C<UdevProperty> is an enum whose variants represent properties by
