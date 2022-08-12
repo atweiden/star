@@ -23,6 +23,7 @@ development
 - rename `HostName $.host-name` -> `Hostname $.hostname`
 - handle `Mode` -> `DiskEncryption`, `DmCryptTarget`, `BootSecurityLevel`
 - rename `Timezone $.timezone` -> `TimeZone $.time-zone`
+- rename `VaultType $.vault-type` -> `DmCryptMode ...`
 - handle new enum `Star::Types::{DriveType, Graphics, Libc, Processor, VaultType}`
 
 documentation

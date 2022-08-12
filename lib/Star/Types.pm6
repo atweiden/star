@@ -108,6 +108,14 @@ enum DiskEncryption is export <
     BOTH
 >;
 
+#| C<DmCryptMode> is an enum whose variants represent the different
+#| dm-crypt encryption modes available.
+enum DmCryptMode is export <
+    LUKS1
+    LUKS2
+    PLAIN
+>;
+
 #| C<DmCryptTarget> is an enum whose variants represent the different
 #| targets for encryption via the dm-crypt kernel crypto API.
 #|
@@ -217,14 +225,6 @@ enum Processor is export <
 enum UdevProperty is export <
     DEVLINKS
     ID_SERIAL_SHORT
->;
-
-#| C<VaultType> is an enum whose variants represent the different disk
-#| encryption methods available for encrypting volumes.
-enum VaultType is export <
-    LUKS1
-    LUKS2
-    PLAIN
 >;
 
 =head2 Subsets
