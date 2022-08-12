@@ -14,7 +14,7 @@ has Hostname:D $.hostname is required;
 #| C<$.keymap> is the keyboard mapping, e.g. "us".
 has Keymap:D $.keymap is required;
 
-#| C<$.locale> is the locale, e.g. "en_US.UTF-8 UTF-8".
+#| C<$.locale> is the locale, e.g. "en_US".
 has Locale:D $.locale is required;
 
 #| C<$.processor> is the type of CPU, e.g. Intel or AMD.

@@ -6,46 +6,6 @@ use Star::Constants;
 #| to system settings, e.g. keymaps, locales, and time zones.
 unit class Star::System::Utils;
 
-#| C<ls> returns an C<Array> of files in the directory at C<$path>,
-#| in C<Str> representation.
-#|
-#| Pass optional C<Bool> C<:recursive> to recursively list directory.
-multi sub ls(
-    Str:D $path where .IO.d.so,
-    Bool:D :recursive($)! where .so
-    --> Array[Str:D]
-)
-{
-    my Str:D @path = do {
-        my Str:D @path = ls($path);
-        ls-r(@path);
-    };
-}
-
-multi sub ls(
-    Str:D $path where .IO.d.so,
-    Bool :recursive($)
-    --> Array[Str:D]
-)
-{
-    my Str:D @path = dir($path).race.map({ .Str });
-}
-
-multi sub ls-r(Str:D @p --> Array[Str:D])
-{
-    my Str:D @path = @p.race.map(-> Str:D $path { ls-r($path) }).flat;
-}
-
-multi sub ls-r(Str:D $path where .IO.d.so --> Array[Str:D])
-{
-    my Str:D @path = ls($path, :recursive);
-}
-
-multi sub ls-r(Str:D $path where .IO.f.so --> Str:D)
-{
-    $path;
-}
-
 #| C<ls-keymaps> returns an C<Array> of keymaps installed, in C<Str>
 #| representation.
 method ls-keymaps(--> Array[Str:D])
@@ -107,6 +67,48 @@ method ls-time-zones(--> Array[Str:D])
         push(@time-zone, 'UTC');
         @time-zone;
     };
+}
+
+=head2 Helper functions
+
+#| C<ls> returns an C<Array> of files in the directory at C<$path>,
+#| in C<Str> representation.
+#|
+#| Pass optional C<Bool> C<:recursive> to recursively list directory.
+multi sub ls(
+    Str:D $path where .IO.d.so,
+    Bool:D :recursive($)! where .so
+    --> Array[Str:D]
+)
+{
+    my Str:D @path = do {
+        my Str:D @path = ls($path);
+        ls-r(@path);
+    };
+}
+
+multi sub ls(
+    Str:D $path where .IO.d.so,
+    Bool :recursive($)
+    --> Array[Str:D]
+)
+{
+    my Str:D @path = dir($path).race.map({ .Str });
+}
+
+multi sub ls-r(Str:D @p --> Array[Str:D])
+{
+    my Str:D @path = @p.race.map(-> Str:D $path { ls-r($path) }).flat;
+}
+
+multi sub ls-r(Str:D $path where .IO.d.so --> Array[Str:D])
+{
+    my Str:D @path = ls($path, :recursive);
+}
+
+multi sub ls-r(Str:D $path where .IO.f.so --> Str:D)
+{
+    $path;
 }
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:

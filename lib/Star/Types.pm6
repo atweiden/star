@@ -1,7 +1,10 @@
 use v6;
 use Star::Constants;
+use Star::Grammar;
 use Star::System::Utils;
 unit module Star::Types;
+
+my \Utils = Star::System::Utils;
 
 =head2 Enums
 
@@ -18,8 +21,8 @@ unit module Star::Types;
 #| =begin item1
 #|
 #| C<1FA>: Mostly for development purposes. Only for use with
-#| C<DiskEncryption::DMCRYPT> and either C<DmCryptTarget::ROOT> or
-#| C<DmCryptTarget::BOTH>.
+#| C<DiskEncryption::DMCRYPT> (or C<DiskEncryption::BOTH>) and either
+#| C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>.
 #|
 #| Two partitions on single device, one root partition, one boot
 #| partition. Root partition encrypted and headerless, its header detached
@@ -110,6 +113,10 @@ enum DiskEncryption is export <
 
 #| C<DmCryptMode> is an enum whose variants represent the different
 #| dm-crypt encryption modes available.
+#|
+#| =item C<LUKS1>: Linux Unified Key Setup (LUKS), version 1 format
+#| =item C<LUKS2>: LUKS, version 2 format
+#| =item C<PLAIN>: dm-crypt plain mode
 enum DmCryptMode is export <
     LUKS1
     LUKS2
@@ -230,11 +237,37 @@ enum UdevProperty is export <
 
 =head2 Subsets
 
-#| C<AbsolutePath> represents an absolute path in C<Str> representation.
+#| C<AbsolutePath> is an absolute path in C<Str> representation.
 subset AbsolutePath of Str is export where .defined && .IO.is-absolute.so;
 
-#| C<RelativePath> represents a relative path in C<Str> representation.
+#| C<RelativePath> is a relative path in C<Str> representation.
 subset RelativePath of Str is export where .defined && .IO.is-relative.so;
+
+#| C<DeviceName> is a valid device mapper name for encrypted volumes.
+subset DeviceName of Str is export where
+{
+    Star::Grammar.parse($_, :rule<device-name>);
+}
+
+#| C<DmCryptVolumePassword> is a valid password for dm-crypt encrypted
+#| volumes. Password length must be between 1-512 characters.
+subset DmCryptVolumePassword of Str is export where { 0 < .chars <= 512 };
+
+#| C<DmCryptRootVolumeHeader> is a type alias to C<VaultSecretPrefix>.
+#| It exists to ensure the dm-crypt encrypted root volume detached header
+#| resides within The Vault secret prefix.
+subset DmCryptRootVolumeHeader of VaultSecretPrefix is export;
+
+#| C<DmCryptRootVolumeKeyFile> is a type alias to C<VaultSecretPrefix>. It
+#| exists to ensure the dm-crypt encrypted root volume key file - for
+#| double password entry avoidance on system startup - resides within
+#| The Vault secret prefix.
+subset DmCryptRootVolumeKeyFile of VaultSecretPrefix is export;
+
+#| C<DmCryptBootVolumeKeyFile> is a type alias to C<BootvaultSecretPrefix>.
+#| It exists to ensure the dm-crypt encrypted boot volume key file resides
+#| within The Bootvault secret prefix.
+subset DmCryptBootVolumeKeyFile of BootvaultSecretPrefix is export;
 
 #| C<Hostname> is a valid hostname for identification on a network.
 subset Hostname of Str is export where
@@ -242,7 +275,13 @@ subset Hostname of Str is export where
     Star::Grammar.parse($_, :rule<hostname>);
 }
 
-#| C<Locale> represents a locale found in C</usr/share/i18n/locales>.
+#| C<Keymap> is a keymap found in C</usr/share/kbd/keymaps>.
+subset Keymap of Str is export where
+{
+    is-keymap($_);
+}
+
+#| C<Locale> is a locale found in C</usr/share/i18n/locales>.
 subset Locale of Str is export where
 {
     is-locale($_);
@@ -254,8 +293,8 @@ subset LvmVolumeGroupName of Str is export where
     Star::Grammar.parse($_, :rule<lvm-vg-name>);
 }
 
-#| C<TimeZone> represents a "Region/City" found in C</usr/share/zoneinfo>,
-#| or UTC.
+#| C<TimeZone> is a "Region/City" in the I<tzdb> time zone descriptions
+#| file (C</usr/share/zoneinfo/zone1970.tab>), or UTC.
 subset TimeZone of Str is export where
 {
     is-time-zone($_);
@@ -267,57 +306,33 @@ subset UserName of Str is export where
     Star::Grammar.parse($_, :rule<user-name>);
 }
 
-#| C<VaultSecretPrefix> is an absolute path inside The Vault secret
-#| prefix where Vault secret material can reside.
+#| C<VaultSecretPrefix> is an absolute path (in C<Str> representation)
+#| inside The Vault secret prefix where Vault secret material can reside.
 subset VaultSecretPrefix of AbsolutePath is export where
 {
     rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-VAULT.IO;
 }
 
-#| C<BootvaultSecretPrefix> is an absolute path inside The Bootvault
-#| secret prefix where Bootvault secret material can reside.
-subset BootvaultSecretPrefix of AbsolutePath where
+#| C<BootvaultSecretPrefix> is an absolute path (in C<Str> representation)
+#| inside The Bootvault secret prefix where Bootvault secret material can
+#| reside.
+subset BootvaultSecretPrefix of AbsolutePath is export where
 {
     rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-BOOTVAULT.IO;
 }
 
-#| C<VaultHeader> is a type alias to C<VaultSecretPrefix>. It exists to
-#| ensure The Vault detached header resides within The Vault secret
-#| prefix.
-subset VaultHeader of VaultSecretPrefix is export;
-
-#| C<VaultKeyFile> is a type alias to C<VaultSecretPrefix>. It exists
-#| to ensure The Vault key file - for double password entry avoidance
-#| on system startup - resides within The Vault secret prefix.
-subset VaultKeyFile of VaultSecretPrefix is export;
-
-#| C<BootvaultKeyFile> is a type alias to C<BootvaultSecretPrefix>. It
-#| exists to ensure The Bootvault key file resides within The Bootvault
-#| secret prefix.
-subset BootvaultKeyFile of BootvaultSecretPrefix is export;
-
-#| C<VaultName> is a valid device mapper name for encrypted volumes.
-subset VaultName of Str is export where
-{
-    Star::Grammar.parse($_, :rule<vault-name>);
-}
-
-#| C<VaultPass> is a valid password for encrypted volumes. N.B. password
-#| length must be between 1-512 characters.
-subset VaultPass of Str is export where { 0 < .chars <= 512 };
-
 =head2 Helper functions
 
-multi sub is-keymap(Str:D $ where Star::System::Utils.ls-keymaps.grep($_) --> True) {*}
+multi sub is-keymap(Str:D $ where Utils.ls-keymaps.grep($_) --> True) {*}
 multi sub is-keymap(Str $ --> False) {*}
 
-multi sub is-locale(Str:D $ where Star::System::Utils.ls-locales.grep($_) --> True) {*}
+multi sub is-locale(Str:D $ where Utils.ls-locales.grep($_) --> True) {*}
 multi sub is-locale(Str $ --> False) {*}
 
-multi sub is-time-zone(Str:D $ where Star::System::Utils.ls-time-zones.grep($_) --> True) {*}
+multi sub is-time-zone(Str:D $ where Utils.ls-time-zones.grep($_) --> True) {*}
 multi sub is-time-zone(Str $ --> False) {*}
 
-multi sub rootpart(IO:D $path where $path.parent eq '/'.IO --> IO:D) { $path }
+multi sub rootpart(IO:D $path where .parent eq '/'.IO --> IO:D) { $path }
 multi sub rootpart(IO:D $path --> IO:D) { rootpart($path.parent) }
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
