@@ -31,8 +31,7 @@ and stored in encrypted boot volume on separate device, root partition
 formatted NILFS2 (on LVM), boot partition formatted ext2.
 
 ```bash
-# `--disk-encryption` and `--dm-crypt-target` default to `dm-crypt` and
-# `both`, respectively, and are hence optional here
+# --disk-encryption and --dm-crypt-target default to "dm-crypt" and "both"
 star \
   --disk-encryption=dm-crypt \
   --dm-crypt-target=both \
