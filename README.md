@@ -31,8 +31,8 @@ and stored in encrypted boot volume on separate device, root partition
 formatted NILFS2 (on LVM), boot partition formatted ext2.
 
 ```bash
-# --encryption and --dm-crypt-target default to "dm-crypt" and "both"
-star --encryption=dm-crypt --dm-crypt-target=both new void vault 2fa nilfs2/ext2+lvm
+# --disk-encryption and --dm-crypt-target default to "dm-crypt" and "both"
+star --disk-encryption=dm-crypt --dm-crypt-target=both new void vault 2fa nilfs2/ext2+lvm
 ```
 
 Pre-select Arch, full disk encryption (excepting `/boot`) with headerless
