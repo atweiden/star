@@ -19,6 +19,13 @@ Same as the above, but with Alpine pre-selected.
 star new alpine
 ```
 
+Pre-select Alpine, root partition formatted btrfs (no LVM), boot partition
+formatted ext4.
+
+```bash
+star new alpine btrfs
+```
+
 Pre-select Void, full disk encryption (including encrypted `/boot`)
 with headerless root volume on unpartitioned device its header detached
 and stored in encrypted boot volume on separate device, root partition
@@ -63,11 +70,4 @@ star \
   arch \
   vault \
   xfs+lvm
-```
-
-Pre-select Alpine, root partition formatted btrfs (no LVM), boot partition
-formatted ext4.
-
-```bash
-star new alpine btrfs
 ```
