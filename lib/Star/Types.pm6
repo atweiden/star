@@ -21,7 +21,7 @@ my \Utils = Star::System::Utils;
 #| =begin item1
 #|
 #| C<1FA>: Mostly for development purposes. Only for use with
-#| C<DiskEncryption::DMCRYPT> (or C<DiskEncryption::BOTH>) and either
+#| C<DiskEncryption::DM-CRYPT> (or C<DiskEncryption::BOTH>) and either
 #| C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>.
 #|
 #| Two partitions on single device, one root partition, one boot
@@ -37,7 +37,7 @@ my \Utils = Star::System::Utils;
 #|
 #| =begin item2
 #|
-#| With C<DiskEncryption::DMCRYPT> and C<DmCryptTarget::BOOT>: An
+#| With C<DiskEncryption::DM-CRYPT> and C<DmCryptTarget::BOOT>: An
 #| external drive connected via USB port acts as the second factor.
 #| C</boot> is encrypted and stored in the external drive. Alternatively,
 #| a secret key stored on external hardware is used to decrypt C</boot>.
@@ -45,7 +45,7 @@ my \Utils = Star::System::Utils;
 #| With C<DiskEncryption::BOTH> and C<DmCryptTarget::BOOT>: Same as the
 #| above, additionally decrypting the filesystem.
 #|
-#| With C<DiskEncryption::DMCRYPT> and either C<DmCryptTarget::ROOT>
+#| With C<DiskEncryption::DM-CRYPT> and either C<DmCryptTarget::ROOT>
 #| or C<DmCryptTarget::BOTH>: An external drive connected via USB port
 #| acts as the second factor. C</boot> is stored in the external drive
 #| either encrypted or unencrypted, depending. The root volume is
@@ -63,7 +63,7 @@ my \Utils = Star::System::Utils;
 #| =end item2
 #|
 #| C<BootSecurityLevel> is only relevant when disk encryption is used,
-#| either C<DiskEncryption::DMCRYPT>, C<DiskEncryption::FILESYSTEM>, or
+#| either C<DiskEncryption::DM-CRYPT>, C<DiskEncryption::FILESYSTEM>, or
 #| C<DiskEncryption::BOTH>.
 enum BootSecurityLevel is export <
     BASE
@@ -90,7 +90,7 @@ enum DeviceLocator is export <
 #| C<NONE>: Disable disk encryption.
 #|
 #| =for item
-#| C<DMCRYPT>: Enable disk encryption via the dm-crypt kernel crypto
+#| C<DM-CRYPT>: Enable disk encryption via the dm-crypt kernel crypto
 #| API. Uses I<cryptsetup>. Can be used to encrypt C</boot>.
 #|
 #| =for item
@@ -106,7 +106,7 @@ enum DeviceLocator is export <
 #| via the filesystem's native encryption implementation.
 enum DiskEncryption is export <
     NONE
-    DMCRYPT
+    DM-CRYPT
     FILESYSTEM
     BOTH
 >;

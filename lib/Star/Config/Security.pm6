@@ -1,7 +1,7 @@
 use v6;
 use Star::Types;
 
-role Star::Config::Security[Mode:D :mode($)! where Mode::BASE]
+my role Common[Mode:D :mode($)! where Mode::BASE]
 {
     #| C<$.vault-name> is the name of The Vault.
     #|
@@ -70,9 +70,9 @@ role Star::Config::Security[Mode:D :mode($)! where Mode::BASE]
     has Str $.vault-sector-size;
 }
 
-role Star::Config::Security[Mode:D :mode($)! where Mode::<1FA>]
+my role Common[Mode:D :mode($)! where Mode::<1FA>]
 {
-    also does Star::Config::Security[Mode::BASE];
+    also does Common[Mode::BASE];
 
     #| C<$.bootvault-name> is the name of The Bootvault.
     #|
@@ -149,9 +149,9 @@ role Star::Config::Security[Mode:D :mode($)! where Mode::<1FA>]
     has VaultHeader:D $.vault-header is required;
 }
 
-role Star::Config::Security[Mode:D :mode($)! where Mode::<2FA>]
+my role Common[Mode:D :mode($)! where Mode::<2FA>]
 {
-    also does Star::Config::Security[Mode::<1FA>];
+    also does Common[Mode::<1FA>];
 
     #| C<$.bootvault-device> is the target block device path for The
     #| Bootvault. The Bootvault will be created on this device.
@@ -160,5 +160,178 @@ role Star::Config::Security[Mode:D :mode($)! where Mode::<2FA>]
     #| The Vault.
     has Str:D $.bootvault-device is required;
 }
+
+class Star::Config::Security
+{
+    proto method new(|)
+    {*}
+
+    multi method new(
+        *%opts (
+            DiskEncryption :disk-encryption($),
+            BootSecurityLevel :boot-security-level($),
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
+        --> Star::Config::Security:D
+    )
+    {
+        new(|%opts);
+    }
+
+    multi sub new(
+        DiskEncryption:D :disk-encryption($)! where DiskEncryption::NONE,
+        BootSecurityLevel :boot-security-level($),
+        DmCryptTarget :dm-crypt-target($),
+        DmCryptMode :dm-crypt-root-volume-mode($),
+        DmCryptMode :dm-crypt-boot-volume-mode($)
+    )
+    {
+        new-encryption-none();
+    }
+
+    multi sub new(
+        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DM-CRYPT,
+        *%opts (
+            BootSecurityLevel :boot-security-level($),
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
+    )
+    {
+        new-encryption-dm-crypt(|%opts);
+    }
+
+    multi sub new(
+        DiskEncryption:D :disk-encryption($)! where DiskEncryption::FILESYSTEM,
+        *%opts (
+            BootSecurityLevel :boot-security-level($),
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
+    )
+    {
+        new-encryption-filesystem(|%opts);
+    }
+
+    multi sub new(
+        DiskEncryption:D :disk-encryption($)! where DiskEncryption::BOTH,
+        *%opts (
+            BootSecurityLevel :boot-security-level($),
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
+    )
+    {
+        new-encryption-both(|%opts),
+    }
+
+    multi sub new(
+        DiskEncryption :disk-encryption($),
+        BootSecurityLevel :boot-security-level($),
+        DmCryptTarget :dm-crypt-target($),
+        DmCryptMode :dm-crypt-root-volume-mode($),
+        DmCryptMode :dm-crypt-boot-volume-mode($)
+    )
+    {
+        new-encryption-none();
+    }
+
+    multi sub new-encryption-none()
+    {
+    }
+
+    multi sub new-encryption-dm-crypt(
+        BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_),
+        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
+        DmCryptMode:D :dm-crypt-root-volume-mode($)!,
+        DmCryptMode:D :dm-crypt-boot-volume-mode($)!
+    )
+    {
+        # with separate boot partition
+    }
+
+    multi sub new-encryption-dm-crypt(
+        BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_),
+        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
+        DmCryptMode:D :dm-crypt-root-volume-mode($)!,
+        DmCryptMode :dm-crypt-boot-volume-mode($)
+    )
+    {
+        # with separate boot partition
+    }
+
+    multi sub new-encryption-dm-crypt(
+        BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_),
+        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOOT,
+        DmCryptMode:D :dm-crypt-boot-volume-mode($)!,
+        DmCryptMode :dm-crypt-root-volume-mode($)
+    )
+    {
+        # with separate boot partition
+    }
+
+    multi sub new-encryption-dm-crypt(
+        BootSecurityLevel:D :boot-security-level($)!,
+        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
+        DmCryptMode:D :dm-crypt-root-volume-mode($)!,
+        DmCryptMode :dm-crypt-boot-volume-mode($)
+    )
+    {
+        # without separate boot partition
+    }
+
+    multi sub new-encryption-dm-crypt(
+        BootSecurityLevel:D :boot-security-level($)!,
+        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
+        DmCryptMode:D :dm-crypt-root-volume-mode($)!,
+        DmCryptMode :dm-crypt-boot-volume-mode($)
+    )
+    {
+        # with separate boot partition
+    }
+
+    multi sub new-encryption-dm-crypt(
+        BootSecurityLevel:D :boot-security-level($)!,
+        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOOT,
+        DmCryptMode:D :dm-crypt-boot-volume-mode($)!,
+        DmCryptMode :dm-crypt-root-volume-mode($)
+    )
+    {
+        # with separate boot partition
+    }
+
+    multi sub new-encryption-fileystem(
+        BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_),
+        *% (
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
+    )
+    {
+        # with separate boot partition
+    }
+
+    multi sub new-encryption-fileystem(
+        BootSecurityLevel :boot-security-level($),
+        *% (
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
+    )
+    {
+        # with separate boot partition
+    }
+}
+
+multi sub elevated-bootsec(BootSecurityLevel::<1FA> --> True) {*}
+multi sub elevated-bootsec(BootSecurityLevel::<2FA> --> True) {*}
+multi sub elevated-bootsec($ --> False) {*}
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
