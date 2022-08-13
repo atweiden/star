@@ -19,7 +19,7 @@ Same as the above, but with Alpine pre-selected.
 star new alpine
 ```
 
-Pre-select Alpine, root partition formatted btrfs (no LVM), boot partition
+Pre-select Alpine, root partition formatted btrfs, boot partition
 formatted ext4.
 
 ```bash
