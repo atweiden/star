@@ -25,7 +25,16 @@ and stored in encrypted boot volume on separate device, root partition
 formatted NILFS2 (on LVM), boot partition formatted ext2.
 
 ```bash
-star new void vault 2fa nilfs2/ext2+lvm
+# `--disk-encryption` and `--dm-crypt-target` default to `dm-crypt` and
+# `both`, respectively, and are hence optional here
+star \
+  --disk-encryption=dm-crypt \
+  --dm-crypt-target=both \
+  new \
+  void \
+  vault \
+  2fa \
+  nilfs2/ext2+lvm
 ```
 
 Pre-select Arch, full disk encryption (excepting `/boot`) with headerless
@@ -34,14 +43,26 @@ unencrypted boot partition on separate device, root partition formatted
 ext4 (no LVM), boot partition formatted ext4.
 
 ```bash
-star new arch vault half 2fa ext4
+# pass `--dm-crypt-target=root` to omit `/boot` encryption
+star \
+  --dm-crypt-target=root \
+  new \
+  arch \
+  vault \
+  2fa \
+  ext4
 ```
 
 Pre-select Arch, full disk encryption (excepting `/boot`), root partition
 formatted xfs (on LVM), boot partition formatted xfs.
 
 ```bash
-star new arch vault half xfs+lvm
+star \
+  --dm-crypt-target=root \
+  new \
+  arch \
+  vault \
+  xfs+lvm
 ```
 
 Pre-select Alpine, root partition formatted btrfs (no LVM), boot partition
