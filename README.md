@@ -84,3 +84,9 @@ f2fs.
 ```bash
 star --disk-encryption=filesystem new void vault f2fs
 ```
+
+Licensing
+---------
+
+This is free and unencumbered public domain software. For more
+information, see http://unlicense.org/ or the accompanying UNLICENSE file.
