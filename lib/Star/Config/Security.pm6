@@ -1,172 +1,279 @@
 use v6;
 use Star::Types;
 
-my role Common[Mode:D :mode($)! where Mode::BASE]
+my role DmCryptRootVolume
 {
-    #| C<$.vault-name> is the name of The Vault.
+    #| C<$.name> is the name of the dm-crypt encrypted root volume.
     #|
-    #| This name is used when opening The Vault, e.g.
+    #| This name is used when opening the dm-crypt encrypted root volume,
+    #| e.g.
     #|
-    #|     qqx{cryptsetup luksOpen /dev/sda3 $.vault-name}
+    #|     qqx{cryptsetup luksOpen /dev/sda3 $.name}
     #|
     #| It's recorded in important system settings files, such as
     #| C</etc/default/grub> (see: C<cryptdevice> on Arch, C<rd.luks.name>
     #| on Void and distros using Dracut) and C</etc/crypttab>.
-    has VaultName:D $.vault-name is required;
+    has DeviceName:D $.name is required;
 
-    #| C<$.vault-pass> is the password for The Vault.
+    #| C<$.pass> is the password for the dm-crypt encrypted root volume.
     #|
     #| This attribute is deliberately left optional. Passwords are best
     #| entered interactively via C<cryptsetup>.
-    has VaultPass $.vault-pass;
+    has DmCryptVolumePassword $.pass;
 
-    #| C<$.vault-key-file> is the path to The Vault key file stored
-    #| on disk. This key is randomly generated during installation -
-    #| i.e. C<head -c 64 /dev/random > key> - and serves to avoid having
-    #| to enter The Vault password twice during system startup.
+    #| C<$.key-file> is the path to the dm-crypt encrypted root volume
+    #| key file stored on disk. This key is randomly generated during
+    #| installation, and serves to avoid having to enter the dm-crypt
+    #| encrypted root volume password twice during system startup.
     #|
     #| N.B. The path must be inside of C</boot> (The Vault secret prefix).
-    #|
-    #| C<$.vault-key-file> is largely a vanity feature: its sole purpose
-    #| is to change on disk the path to this randomly-generated key file.
-    has VaultKeyFile:D $.vault-key-file is required;
+    has DmCryptRootVolumeKeyFile:D $.key-file is required;
 
-    #| C<$.vault-cipher> contains the cipher specification for The Vault.
+    #| C<$.cipher> contains the cipher specification for the dm-crypt
+    #| encrypted root volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.vault-cipher is required;
+    has Str:D $.cipher is required;
 
-    #| C<$.vault-hash> contains the passphrase hash used in the LUKS
-    #| key setup scheme and The Vault key digest.
+    #| C<$.hash> contains the passphrase hash used in the LUKS key setup
+    #| scheme and dm-crypt encrypted root volume key digest.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.vault-hash is required;
+    has Str:D $.hash is required;
 
-    #| C<$.vault-iter-time> is the time to spend in ms with PBKDF
-    #| passphrase processing on The Vault.
+    #| C<$.iter-time> is the time to spend in ms with PBKDF passphrase
+    #| processing on the dm-crypt encrypted root volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.vault-iter-time is required;
+    has Str:D $.iter-time is required;
 
-    #| C<$.vault-key-size> is the key size in bits for The Vault.
+    #| C<$.key-size> is the key size in bits for the dm-crypt encrypted
+    #| root volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.vault-key-size is required;
+    has Str:D $.key-size is required;
 
-    #| C<$.vault-offset> is the start offset in The Vault backend device.
+    #| C<$.offset> is the start offset in the dm-crypt encrypted root
+    #| volume backend device.
     #|
     #| N.B. This value must be given in human-readable format, e.g. C<5G>.
     #| This differs from the behaviour of I<cryptsetup>, which requires
-    #| passing a "sector count". C<$.vault-offset> also accepts sector
-    #| counts via postfix C<S>, e.g. C<10485760S>.
+    #| passing a "sector count". C<$.offset> also accepts sector counts
+    #| via postfix C<S>, e.g. C<10485760S>.
     #|
     #| See: C<man cryptsetup>, and C<gen-cryptsetup-luks-offset>.
-    has Str $.vault-offset;
+    has Str $.offset;
 
-    #| C<$.vault-sector-size> is the sector size in bytes for use with
-    #| The Vault.
+    #| C<$.sector-size> is the sector size in bytes for use with the
+    #| dm-crypt encrypted root volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str $.vault-sector-size;
+    has Str $.sector-size;
 }
 
-my role Common[Mode:D :mode($)! where Mode::<1FA>]
+my role DmCryptRootVolumeHeader
 {
-    also does Common[Mode::BASE];
+    #| C<$.header> is the path to the dm-crypt encrypted root volume
+    #| detached header.
+    #|
+    #| N.B. The path must be inside of C</boot> (The Vault secret prefix).
+    has DmCryptRootVolumeHeader:D $.header is required;
+}
 
-    #| C<$.bootvault-name> is the name of The Bootvault.
+my role DmCryptBootVolume
+{
+    #| C<$.name> is the name of the dm-crypt encrypted boot volume.
     #|
-    #| This name is used when opening The Bootvault, e.g.
+    #| This name is used when opening the dm-crypt encrypted boot volume,
+    #| e.g.
     #|
-    #|     qqx{cryptsetup luksOpen /dev/sda3 $.bootvault-name}
+    #|     qqx{cryptsetup luksOpen /dev/sda3 $.name}
     #|
     #| It's recorded in important system settings files, such as
-    #| C</etc/crypttab>.
-    has VaultName:D $.bootvault-name is required;
+    #| C</etc/default/grub> (see: C<cryptdevice> on Arch, C<rd.luks.name>
+    #| on Void and distros using Dracut) and C</etc/crypttab>.
+    has DeviceName:D $.name is required;
 
-    #| C<$.bootvault-pass> is the password for The Bootvault.
+    #| C<$.pass> is the password for the dm-crypt encrypted boot volume.
     #|
     #| This attribute is deliberately left optional. Passwords are best
     #| entered interactively via C<cryptsetup>.
-    has VaultPass $.bootvault-pass;
+    has DmCryptVolumePassword $.pass;
 
-    #| C<$.bootvault-key-file> is the path to The Bootvault key file
-    #| stored on disk. This key is randomly generated during installation
-    #| - i.e. C<head -c 64 /dev/random > key> - and serves to avoid
-    #| having to enter The Bootvault password twice during system startup.
+    #| C<$.key-file> is the path to the dm-crypt encrypted boot volume
+    #| key file stored on disk. This key is randomly generated during
+    #| installation, and serves to avoid having to enter the dm-crypt
+    #| encrypted boot volume password twice during system startup.
     #|
     #| N.B. The path must be inside of C</root> (The Bootvault secret
     #| prefix).
-    #|
-    #| C<$.bootvault-key-file> is largely a vanity feature: its sole
-    #| purpose is to change on disk the path to this randomly-generated
-    #| key file.
-    has BootvaultKeyFile:D $.bootvault-key-file is required;
+    has DmCryptBootVolumeKeyFile:D $.key-file is required;
 
-    #| C<$.bootvault-cipher> contains the cipher specification for
-    #| The Bootvault.
+    #| C<$.cipher> contains the cipher specification for the dm-crypt
+    #| encrypted boot volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.bootvault-cipher is required;
+    has Str:D $.cipher is required;
 
-    #| C<$.bootvault-hash> contains the passphrase hash used in the LUKS
-    #| key setup scheme and The Bootvault key digest.
+    #| C<$.hash> contains the passphrase hash used in the LUKS key setup
+    #| scheme and dm-crypt encrypted boot volume key digest.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.bootvault-hash is required;
+    has Str:D $.hash is required;
 
-    #| C<$.bootvault-iter-time> is the time to spend in ms with PBKDF
-    #| passphrase processing on The Bootvault.
+    #| C<$.iter-time> is the time to spend in ms with PBKDF passphrase
+    #| processing on the dm-crypt encrypted boot volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.bootvault-iter-time is required;
+    has Str:D $.iter-time is required;
 
-    #| C<$.bootvault-key-size> is the key size in bits for The Bootvault.
+    #| C<$.key-size> is the key size in bits for the dm-crypt encrypted
+    #| boot volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str:D $.bootvault-key-size is required;
+    has Str:D $.key-size is required;
 
-    #| C<$.bootvault-offset> is the start offset in The Bootvault backend
-    #| device.
+    #| C<$.offset> is the start offset in the dm-crypt encrypted boot
+    #| volume backend device.
     #|
     #| N.B. This value must be given in human-readable format, e.g. C<5G>.
     #| This differs from the behaviour of I<cryptsetup>, which requires
-    #| passing a "sector count". C<$.bootvault-offset> also accepts
-    #| sector counts via postfix C<S>, e.g. C<10485760S>.
+    #| passing a "sector count". C<$.offset> also accepts sector counts
+    #| via postfix C<S>, e.g. C<10485760S>.
     #|
     #| See: C<man cryptsetup>, and C<gen-cryptsetup-luks-offset>.
-    has Str $.bootvault-offset;
+    has Str $.offset;
 
-    #| C<$.bootvault-sector-size> is the sector size in bytes for use with
-    #| The Bootvault.
+    #| C<$.sector-size> is the sector size in bytes for use with the
+    #| dm-crypt encrypted boot volume.
     #|
     #| See: C<man cryptsetup>.
-    has Str $.bootvault-sector-size;
-
-    #| C<$.vault-header> is the path to The Vault detached header.
-    #|
-    #| N.B. The path must be inside of C</boot> (The Vault secret prefix).
-    has VaultHeader:D $.vault-header is required;
+    has Str $.sector-size;
 }
 
-my role Common[Mode:D :mode($)! where Mode::<2FA>]
+my role DmCryptBootVolumeDevice
 {
-    also does Common[Mode::<1FA>];
-
-    #| C<$.bootvault-device> is the target block device path for The
-    #| Bootvault. The Bootvault will be created on this device.
+    #| C<$.device> is the target block device path for the dm-crypt
+    #| encrypted boot volume.
     #|
-    #| N.B. This device must differ from the target block device for
-    #| The Vault.
-    has Str:D $.bootvault-device is required;
+    #| N.B. This device must differ from the target block device for the
+    #| system root (or dm-crypt encrypted root volume).
+    has Str:D $.device is required;
+}
+
+class Star::Config::Security::DmCrypt::Root
+{
+    also does DmCryptRootVolume;
+
+    multi method new(
+        BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_),
+        *%opts (
+        )
+        --> Star::Config::Security::DmCrypt::Root:D
+    )
+    {
+        # Detach dm-crypt encrypted root volume header when using elevated
+        # boot security levels.
+        self.^mixin(DmCryptRootVolumeHeader).bless(|%opts);
+    }
+
+    multi method new(
+        BootSecurityLevel :boot-security-level($),
+        *%opts (
+        )
+        --> Star::Config::Security::DmCrypt::Root:D
+    )
+    {
+        self.bless(|%opts);
+    }
+}
+
+class Star::Config::Security::DmCrypt::Boot
+{
+    also does DmCryptBootVolume;
+
+    multi method new(
+        BootSecurityLevel:D :boot-security-level($)! where BootSecurityLevel::<2FA>,
+        *%opts (
+        )
+        --> Star::Config::Security::DmCrypt::Boot:D
+    )
+    {
+        # Install dm-crypt encrypted boot volume to separate device when
+        # using 2FA boot security level.
+        self.^mixin(DmCryptBootVolumeDevice).bless(|%opts);
+    }
+
+    multi method new(
+        BootSecurityLevel :boot-security-level($),
+        *%opts (
+        )
+        --> Star::Config::Security::DmCrypt::Boot:D
+    )
+    {
+        self.bless(|%opts);
+    }
+}
+
+my role DmCryptBoot
+{
+    has Star::Config::Security::DmCrypt::Boot:D $.boot-volume is required;
+}
+
+my role DmCryptRoot
+{
+    has Star::Config::Security::DmCrypt::Root:D $.root-volume is required;
+}
+
+class Star::Config::Security::DmCrypt
+{
+    multi method new(
+        *%opts (
+            BootSecurityLevel:D $ where BootSecurityLevel::<2FA>,
+        )
+        --> Star::Config::Security::DmCrypt:D
+    )
+    {
+        self.^mixin(DmCryptRoot, DmCryptBoot).bless(|%opts);
+    }
+
+    multi method new(
+        *%opts (
+            BootSecurityLevel:D $,
+        )
+        --> Star::Config::Security::DmCrypt:D
+    )
+    {
+        self.^mixin(DmCryptRoot).bless(|%opts);
+    }
+
+    multi method new(
+        *%opts (
+            BootSecurityLevel:D $,
+        )
+        --> Star::Config::Security::DmCrypt:D
+    )
+    {
+        self.^mixin(DmCryptBoot).bless(|%opts);
+    }
+}
+
+class Star::Config::Security::Filesystem
+{*}
+
+my role SecurityDmCrypt
+{
+    has Star::Config::Security::DmCrypt:D $.dm-crypt is required;
+}
+
+my role SecurityFilesystem
+{
+    has Star::Config::Security::Filesystem:D $.filesystem is required;
 }
 
 class Star::Config::Security
 {
-    proto method new(|)
-    {*}
-
-    multi method new(
+    method new(
         *%opts (
             DiskEncryption :disk-encryption($),
             BootSecurityLevel :boot-security-level($),
@@ -177,15 +284,19 @@ class Star::Config::Security
         --> Star::Config::Security:D
     )
     {
+        # Facilitate use of subroutines.
+        my $*self = self;
         new(|%opts);
     }
 
     multi sub new(
         DiskEncryption:D :disk-encryption($)! where DiskEncryption::NONE,
-        BootSecurityLevel :boot-security-level($),
-        DmCryptTarget :dm-crypt-target($),
-        DmCryptMode :dm-crypt-root-volume-mode($),
-        DmCryptMode :dm-crypt-boot-volume-mode($)
+        *% (
+            BootSecurityLevel :boot-security-level($),
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
     )
     {
         new-encryption-none();
@@ -231,11 +342,13 @@ class Star::Config::Security
     }
 
     multi sub new(
-        DiskEncryption :disk-encryption($),
-        BootSecurityLevel :boot-security-level($),
-        DmCryptTarget :dm-crypt-target($),
-        DmCryptMode :dm-crypt-root-volume-mode($),
-        DmCryptMode :dm-crypt-boot-volume-mode($)
+        *% (
+            DiskEncryption :disk-encryption($),
+            BootSecurityLevel :boot-security-level($),
+            DmCryptTarget :dm-crypt-target($),
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
+        )
     )
     {
         new-encryption-none();
@@ -243,6 +356,7 @@ class Star::Config::Security
 
     multi sub new-encryption-none()
     {
+        self.bless;
     }
 
     multi sub new-encryption-dm-crypt(
