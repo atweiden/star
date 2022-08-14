@@ -90,8 +90,7 @@ my role DmCryptBootVolume
     #|     qqx{cryptsetup luksOpen /dev/sda3 $.name}
     #|
     #| It's recorded in important system settings files, such as
-    #| C</etc/default/grub> (see: C<cryptdevice> on Arch, C<rd.luks.name>
-    #| on Void and distros using Dracut) and C</etc/crypttab>.
+    #| C</etc/crypttab>.
     has DeviceName:D $.name is required;
 
     #| C<$.pass> is the password for the dm-crypt encrypted boot volume.
