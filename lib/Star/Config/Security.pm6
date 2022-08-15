@@ -1,7 +1,24 @@
 use v6;
 use Star::Types;
 
-my role DmCryptRootVolume
+my role DmCryptRootVolume[
+    #| C<$mode> is the dm-crypt encrypted root volume encryption mode.
+    #|
+    #| C<$mode> must be C<LUKS1> when C<DmCryptTarget::BOTH> and
+    #| C<BootSecurityLevel::BASE>, because GRUB is presently practically
+    #| speaking incapable of booting from volumes encrypted with any other
+    #| dm-crypt encryption mode. This isn't enforced by the type system
+    #| here, however, because even if C<DmCryptRootVolume>'s parametric
+    #| signature featured the necessary parameters C<DmCryptTarget> and
+    #| C<BootSecurityLevel> for detecting invalid configuration, invalid
+    #| attempts would merely raise the rather general exception
+    #| C<X::Role::Parametric::NoSuchCandidate>. While catching this
+    #| exception and subsequently handling it would be a viable option,
+    #| better to raise a specialized exception earlier on in the config
+    #| instantiation process.
+    DmCryptMode:D $mode
+    #= C<$mode> is assumed to be valid.
+]
 {
     #| C<$.name> is the name of the dm-crypt encrypted root volume.
     #|
@@ -69,6 +86,10 @@ my role DmCryptRootVolume
     #|
     #| See: C<man cryptsetup>.
     has Str $.sector-size;
+
+    #| C<mode> returns the dm-crypt encryption mode to be used in the
+    #| creation of the dm-crypt encrypted root volume.
+    method mode(--> DmCryptMode:D) { $mode }
 }
 
 my role DmCryptRootVolumeHeader
@@ -80,7 +101,16 @@ my role DmCryptRootVolumeHeader
     has DmCryptRootVolumeHeader:D $.header is required;
 }
 
-my role DmCryptBootVolume
+my role DmCryptBootVolume[
+    #| C<$mode> is the dm-crypt encrypted boot volume encryption mode.
+    #|
+    #| C<$mode> must be C<LUKS1>, because GRUB is presently practically
+    #| speaking incapable of booting from volumes encrypted with any other
+    #| dm-crypt encryption mode. This isn't enforced by the type system
+    #| here, however, for API consistency (see: C<DmCryptRootVolume>).
+    DmCryptMode:D $mode
+    #= C<$mode> is assumed to be valid.
+]
 {
     #| C<$.name> is the name of the dm-crypt encrypted boot volume.
     #|
@@ -148,6 +178,10 @@ my role DmCryptBootVolume
     #|
     #| See: C<man cryptsetup>.
     has Str $.sector-size;
+
+    #| C<mode> returns the dm-crypt encryption mode to be used in the
+    #| creation of the dm-crypt encrypted boot volume.
+    method mode(--> DmCryptMode:D) { $mode }
 }
 
 my role DmCryptBootVolumeDevice
@@ -162,55 +196,69 @@ my role DmCryptBootVolumeDevice
 
 class Star::Config::Security::DmCrypt::Root
 {
-    also does DmCryptRootVolume;
-
     multi method new(
         BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_),
+        DmCryptMode:D :$dm-crypt-root-volume-mode!,
+        DmCryptMode :dm-crypt-boot-volume-mode($),
         *%opts (
         )
         --> Star::Config::Security::DmCrypt::Root:D
     )
     {
-        # Detach dm-crypt encrypted root volume header when using elevated
-        # boot security levels.
-        self.^mixin(DmCryptRootVolumeHeader).bless(|%opts);
+        self.^mixin(
+            DmCryptRootVolume[$dm-crypt-root-volume-mode],
+            # Detach dm-crypt encrypted root volume header when using
+            # elevated boot security levels.
+            DmCryptRootVolumeHeader
+        ).bless(|%opts);
     }
 
     multi method new(
+        DmCryptMode:D :$dm-crypt-root-volume-mode!,
         BootSecurityLevel :boot-security-level($),
+        DmCryptMode :dm-crypt-boot-volume-mode($),
         *%opts (
         )
         --> Star::Config::Security::DmCrypt::Root:D
     )
     {
-        self.bless(|%opts);
+        self.^mixin(
+            DmCryptRootVolume[$dm-crypt-root-volume-mode]
+        ).bless(|%opts);
     }
 }
 
 class Star::Config::Security::DmCrypt::Boot
 {
-    also does DmCryptBootVolume;
-
     multi method new(
         BootSecurityLevel:D :boot-security-level($)! where BootSecurityLevel::<2FA>,
+        DmCryptMode:D :$dm-crypt-boot-volume-mode!,
+        DmCryptMode :dm-crypt-root-volume-mode($),
         *%opts (
         )
         --> Star::Config::Security::DmCrypt::Boot:D
     )
     {
-        # Install dm-crypt encrypted boot volume to separate device when
-        # using 2FA boot security level.
-        self.^mixin(DmCryptBootVolumeDevice).bless(|%opts);
+        self.^mixin(
+            DmCryptBootVolume[$dm-crypt-boot-volume-mode],
+            # Install dm-crypt encrypted boot volume on separate device
+            # when using 2FA boot security level.
+            DmCryptBootVolumeDevice
+        ).bless(|%opts);
     }
 
     multi method new(
+        DmCryptMode:D :$dm-crypt-boot-volume-mode!,
         BootSecurityLevel :boot-security-level($),
+        DmCryptMode :dm-crypt-root-volume-mode($),
         *%opts (
         )
         --> Star::Config::Security::DmCrypt::Boot:D
     )
     {
-        self.bless(|%opts);
+        self.^mixin(
+            DmCryptBootVolume[$dm-crypt-boot-volume-mode],
+        ).bless(|%opts);
     }
 }
 
@@ -228,11 +276,15 @@ class Star::Config::Security::DmCrypt
 {
     multi method new(
         *%opts (
-            BootSecurityLevel:D $ where BootSecurityLevel::<2FA>,
+            BootSecurityLevel:D :boot-security-level($)! where BootSecurityLevel::<2FA>,
+            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
+            DmCryptMode :dm-crypt-root-volume-mode($),
+            DmCryptMode :dm-crypt-boot-volume-mode($)
         )
         --> Star::Config::Security::DmCrypt:D
     )
     {
+        # TODO: instantiate C<DmCrypt::{Root,Boot}> here
         self.^mixin(DmCryptRoot, DmCryptBoot).bless(|%opts);
     }
 
@@ -243,6 +295,7 @@ class Star::Config::Security::DmCrypt
         --> Star::Config::Security::DmCrypt:D
     )
     {
+        # TODO: instantiate C<DmCrypt::Root> here
         self.^mixin(DmCryptRoot).bless(|%opts);
     }
 
@@ -253,6 +306,7 @@ class Star::Config::Security::DmCrypt
         --> Star::Config::Security::DmCrypt:D
     )
     {
+        # TODO: instantiate C<DmCrypt::Boot> here
         self.^mixin(DmCryptBoot).bless(|%opts);
     }
 }
@@ -365,7 +419,8 @@ class Star::Config::Security
         DmCryptMode:D :dm-crypt-boot-volume-mode($)!
     )
     {
-        # with separate boot partition
+        my %opts;
+        $*self.^mixin(SecurityDmCrypt).bless(|%opts);
     }
 
     multi sub new-encryption-dm-crypt(
