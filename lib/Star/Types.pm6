@@ -20,7 +20,7 @@ my \Utils = Star::System::Utils;
 #| =begin item1
 #|
 #| C<1FA>: Mostly for development purposes. Only for use with
-#| C<DiskEncryption::DM-CRYPT> (or C<DiskEncryption::BOTH>) and either
+#| C<DiskEncryption::DM-CRYPT> (or C<DiskEncryption::DMFS>) and either
 #| C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>.
 #|
 #| Two partitions on single device, one root partition, one boot
@@ -41,7 +41,7 @@ my \Utils = Star::System::Utils;
 #| C</boot> is encrypted and stored in the external drive. Alternatively,
 #| a secret key stored on external hardware is used to decrypt C</boot>.
 #|
-#| With C<DiskEncryption::BOTH> and C<DmCryptTarget::BOOT>: Same as the
+#| With C<DiskEncryption::DMFS> and C<DmCryptTarget::BOOT>: Same as the
 #| above, additionally decrypting the filesystem.
 #|
 #| With C<DiskEncryption::DM-CRYPT> and either C<DmCryptTarget::ROOT>
@@ -52,7 +52,7 @@ my \Utils = Star::System::Utils;
 #| partition as applicable. Alternatively, a secret key stored on
 #| external hardware is used to decrypt the boot and root partitions.
 #|
-#| With C<DiskEncryption::BOTH> and either C<DmCryptTarget::ROOT> or
+#| With C<DiskEncryption::DMFS> and either C<DmCryptTarget::ROOT> or
 #| C<DmCryptTarget::BOTH>: Same as the above, additionally decrypting
 #| the filesystem.
 #|
@@ -63,7 +63,7 @@ my \Utils = Star::System::Utils;
 #|
 #| C<BootSecurityLevel> is only relevant when disk encryption is used,
 #| either C<DiskEncryption::DM-CRYPT>, C<DiskEncryption::FILESYSTEM>, or
-#| C<DiskEncryption::BOTH>.
+#| C<DiskEncryption::DMFS>.
 enum BootSecurityLevel is export <
     BASE
     1FA
@@ -98,7 +98,7 @@ enum DeviceLocator is export <
 #| and C<Filesystem::F2FS>. Can't be used to encrypt C</boot>.
 #|
 #| =for item
-#| C<BOTH>: Enable disk encryption both via the dm-crypt kernel crypto
+#| C<DMFS>: Enable disk encryption both via the dm-crypt kernel crypto
 #| API and the filesystem's native encryption implementation. Only
 #| available for C<Filesystem::EXT4> and C<Filesystem::F2FS>. May be used
 #| to encrypt boot partition via dm-crypt while encrypting root partition
@@ -107,8 +107,10 @@ enum DiskEncryption is export <
     NONE
     DM-CRYPT
     FILESYSTEM
-    BOTH
+    DMFS
 >;
+#= C<DMFS> is named as such to avoid exporting symbol C<BOTH> twice (see:
+#= C<DmCryptTarget>).
 
 #| C<DmCryptMode> is an enum whose variants represent the different
 #| dm-crypt encryption modes available.
