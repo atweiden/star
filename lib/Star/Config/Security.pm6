@@ -215,8 +215,8 @@ class Star::Config::Security::DmCrypt::Root
     {
         self.^mixin(
             DmCryptRootVolume[$mode],
-            # Detach dm-crypt encrypted root volume header when using
-            # elevated boot security level.
+            # Detach dm-crypt encrypted root volume header for
+            # C<BootSecurityLevel::<2FA>>.
             DmCryptRootVolumeHeader
         ).bless(|%opts);
     }
@@ -265,7 +265,7 @@ class Star::Config::Security::DmCrypt::Boot
         self.^mixin(
             DmCryptBootVolume[$mode],
             # Install dm-crypt encrypted boot volume on separate device
-            # when using 2FA boot security level.
+            # for C<BootSecurityLevel::<2FA>>.
             DmCryptBootVolumeDevice
         ).bless(|%opts);
     }
@@ -426,8 +426,8 @@ class Star::Config::Security::DmCrypt
             Str:D :hash($)!,
             Str:D :iter-time($)!,
             Str:D :key-size($)!,
-            # C<header> attribute required when using elevated boot
-            # security level.
+            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
+            # and C<BootSecurityLevel::<2FA>>.
             DmCryptRootVolumeHeader:D :header($)!,
             DmCryptVolumePassword :pass($),
             Str :offset($),
