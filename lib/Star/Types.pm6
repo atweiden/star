@@ -1,6 +1,5 @@
 use v6;
 use Star::Constants;
-use Star::Grammar;
 use Star::System::Utils;
 unit module Star::Types;
 
@@ -235,6 +234,123 @@ enum UdevProperty is export <
     ID_SERIAL_SHORT
 >;
 
+=head2 Grammar
+
+#| C<TypesSubsetsGrammar> contains miscellaneous tokens and regexes for
+#| validating C<Star::Types> subsets.
+my grammar TypesSubsetsGrammar
+{
+    #| C<alnum-lower> matches a single lowercase alphanumeric character,
+    #| or an underscore.
+    my token alnum-lower
+    {
+        <+alpha-lower +digit>
+    }
+
+    #| C<alpha-lower> matches a single lowercase alphabetic character,
+    #| or an underscore.
+    my token alpha-lower
+    {
+        <+lower +[_]>
+    }
+
+    # C<device-name> matches a valid block device name.
+    token device-name
+    {
+        # Just guessing here.
+        <+alnum +[_] +[\.]> ** 1
+        <+alnum +[-] +[_] +[\.]> ** 0..254
+    }
+
+    #| C<hostname> matches a valid hostname.
+    #|
+    #| Credit: L<https://stackoverflow.com/a/106223>
+    regex hostname
+    {
+        ^
+        [
+            [
+                <+:Letter +digit>
+                ||
+                <+:Letter +digit>
+                <+:Letter +digit +[-]>*
+                <+:Letter +digit>
+            ]
+            '.'
+        ]*
+        [
+            <+:Letter +digit>
+            ||
+            <+:Letter +digit>
+            <+:Letter +digit +[-]>*
+            <+:Letter +digit>
+        ]
+        $
+    }
+
+    #| C<lvm-vg-name> matches a valid LVM volume group name.
+    #|
+    #| From C<man 8 lvm>, line 136 (paraphrasing):
+    #|
+    #| =for item1
+    #| The LVM volume group name can only contain the following
+    #| characters:
+    #|
+    #| =item2 A-Z
+    #| =item2 a-z
+    #| =item2 0-9
+    #| =item2 +
+    #| =item2 _
+    #| =item2 .
+    #| =item2 -
+    #|
+    #| =for item1
+    #| The LVM volume group name can't begin with a hyphen.
+    #|
+    #| =for item1
+    #| The LVM volume group name can't be anything that exists in C</dev>
+    #| at the time of creation.
+    #|
+    #| =for item1
+    #| The LVM volume group name can't be C<.> or C<..>.
+    token lvm-vg-name
+    {
+        (
+            <+alnum +[+] +[_] +[\.]>
+            <+alnum +[+] +[_] +[\.] +[-]>*
+        )
+        { $0 !~~ /^^ '.' ** 1..2 $$/ or fail }
+    }
+
+    #| C<user-name> matches a valid Linux user account name.
+    #|
+    #| From C<man 8 useradd>, line 255 (paraphrasing):
+    #|
+    #| =for item
+    #| The Linux user account name must be between 1 and 32 characters
+    #| long.
+    #|
+    #| =for item
+    #| The Linux user account name can't be "root".
+    #|
+    #| =for item
+    #| The Linux user account name must start with a lowercase letter or
+    #| an underscore, followed by lowercase letters, digits, underscores,
+    #| or dashes.
+    #|
+    #| =for item
+    #| The Linux user account name may end with a dollar sign ($).
+    regex user-name
+    {
+        (
+            <alpha-lower> ** 1
+            <+alnum-lower +[-]> ** 0..30
+            <+alnum-lower +[-] +[$]>?
+        )
+        { $0 ne 'root' or fail }
+    }
+}
+
 =head2 Subsets
 
 #| C<AbsolutePath> is an absolute path in C<Str> representation.
@@ -246,7 +362,7 @@ subset RelativePath of Str is export where .defined && .IO.is-relative.so;
 #| C<DeviceName> is a valid device mapper name for encrypted volumes.
 subset DeviceName of Str is export where
 {
-    Star::Grammar.parse($_, :rule<device-name>);
+    TypesSubsetsGrammar.parse($_, :rule<device-name>);
 }
 
 #| C<DmCryptVolumePassword> is a valid password for dm-crypt encrypted
@@ -272,7 +388,7 @@ subset DmCryptBootVolumeKeyFile of BootvaultSecretPrefix is export;
 #| C<Hostname> is a valid hostname for identification on a network.
 subset Hostname of Str is export where
 {
-    Star::Grammar.parse($_, :rule<hostname>);
+    TypesSubsetsGrammar.parse($_, :rule<hostname>);
 }
 
 #| C<Keymap> is a keymap found in C</usr/share/kbd/keymaps>.
@@ -290,7 +406,7 @@ subset Locale of Str is export where
 #| C<LvmVolumeGroupName> is a valid LVM volume group name.
 subset LvmVolumeGroupName of Str is export where
 {
-    Star::Grammar.parse($_, :rule<lvm-vg-name>);
+    TypesSubsetsGrammar.parse($_, :rule<lvm-vg-name>);
 }
 
 #| C<TimeZone> is a "Region/City" in the I<tzdb> time zone descriptions
@@ -303,7 +419,7 @@ subset TimeZone of Str is export where
 #| C<UserName> is a valid Linux user account name.
 subset UserName of Str is export where
 {
-    Star::Grammar.parse($_, :rule<user-name>);
+    TypesSubsetsGrammar.parse($_, :rule<user-name>);
 }
 
 #| C<VaultSecretPrefix> is an absolute path (in C<Str> representation)
