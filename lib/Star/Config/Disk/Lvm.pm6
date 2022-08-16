@@ -1,6 +1,7 @@
 use v6;
 use Star::Config::Constants;
-unit role Star::Config::Disk::Filesystem::Lvm;
+use X::Star::Config::Disk;
+unit class Star::Config::Disk::Lvm;
 
 #| C<$.volume-group-name> is the name for the LVM volume group.
 has Str:D $.volume-group-name =
@@ -15,7 +16,7 @@ multi sub volume-group-name(
 )
 {
     # Crash rather than wasting too many cycles on this.
-    die(X::Star::Config::Disk::Filesystem::Lvm::VolumeGroupName.new);
+    die(X::Star::Config::Disk::Lvm::VolumeGroupName.new);
 }
 
 multi sub volume-group-name(

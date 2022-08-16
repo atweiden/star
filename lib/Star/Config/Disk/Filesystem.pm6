@@ -1,106 +1,62 @@
 use v6;
 use Star::Types;
 
-my role NilBoot
+my role DiskFilesystemFormat[Filesystem:D $filesystem]
 {
-    has Star::Config::Disk::Filesystem::Format $!boot = Nil;
-    method boot(::?CLASS:D: --> Star::Config::Disk::Filesystem::Format) { $!boot }
+    method format(--> Filesystem:D) { $filesystem }
 }
 
-my role NilLvm
+#| C<DiskFilesystem[Filesystem::BTRFS]> contains Btrfs-specific
+#| configuration.
+my role DiskFilesystem[Filesystem:D $ where Filesystem::BTRFS]
 {
-    has Star::Config::Disk::Filesystem::Lvm $!lvm = Nil;
-    method lvm(::?CLASS:D: --> Star::Config::Disk::Filesystem::Lvm) { $!lvm }
+    also does DiskFilesystemFormat[Filesystem::BTRFS];
 }
 
-# base mode with btrfs root, lvm irrelevant
-role Star::Config::Disk::Filesystem[
-    Mode:D :mode($)! where Mode::BASE,
-    Filesystem:D :$root! where Filesystem::BTRFS,
-    Filesystem :boot($)!,
-    Bool :lvm($)!
-]
+#| C<DiskFilesystem[Filesystem::EXT2]> contains Ext2-specific
+#| configuration.
+my role DiskFilesystem[Filesystem:D $ where Filesystem::EXT2]
 {
-    # boot filesystem n/a in base mode
-    also does NilBoot;
-    # lvm n/a with btrfs
-    also does NilLvm;
-
-    has Star::Config::Disk::Filesystem::Format[$root] $.root is required;
+    also does DiskFilesystemFormat[Filesystem::EXT2];
 }
 
-# base mode with non-btrfs root, lvm enabled
-role Star::Config::Disk::Filesystem[
-    Mode:D :mode($)! where Mode::BASE,
-    Filesystem:D :$root!,
-    Filesystem :boot($)!,
-    Bool:D :$lvm! where .so
-]
+#| C<DiskFilesystem[Filesystem::EXT3]> contains Ext3-specific
+#| configuration.
+my role DiskFilesystem[Filesystem:D $ where Filesystem::EXT3]
 {
-    # boot filesystem n/a in base mode
-    also does NilBoot;
-
-    has Star::Config::Disk::Filesystem::Format[$root] $.root is required;
-    has Star::Config::Disk::Filesystem::Lvm:D $.lvm is required;
+    also does DiskFilesystemFormat[Filesystem::EXT3];
 }
 
-# base mode with non-btrfs root, lvm disabled
-role Star::Config::Disk::Filesystem[
-    Mode:D :mode($)! where Mode::BASE,
-    Filesystem:D :$root!,
-    Filesystem :boot($)!,
-    Bool :lvm($)!
-]
+#| C<DiskFilesystem[Filesystem::EXT4]> contains Ext4-specific
+#| configuration.
+my role DiskFilesystem[Filesystem:D $ where Filesystem::EXT4]
 {
-    # boot filesystem n/a in base mode
-    also does NilBoot;
-    # lvm disabled
-    also does NilLvm;
-
-    has Star::Config::Disk::Filesystem::Format[$root] $.root is required;
+    also does DiskFilesystemFormat[Filesystem::EXT4];
 }
 
-# non-base mode with btrfs root, lvm irrelevant
-role Star::Config::Disk::Filesystem[
-    Mode:D :mode($)!,
-    Filesystem:D :$root! where Filesystem::BTRFS,
-    Filesystem:D :$boot!,
-    Bool :lvm($)!
-]
+#| C<DiskFilesystem[Filesystem::F2FS]> contains F2FS-specific
+#| configuration.
+my role DiskFilesystem[Filesystem:D $ where Filesystem::F2FS]
 {
-    # lvm n/a with btrfs
-    also does NilLvm;
-
-    has Star::Config::Disk::Filesystem::Format[$root] $.root is required;
-    has Star::Config::Disk::Filesystem::Format[$boot] $.boot is required;
+    also does DiskFilesystemFormat[Filesystem::F2FS];
 }
 
-# non-base mode with non-btrfs root, lvm enabled
-role Star::Config::Disk::Filesystem[
-    Mode:D :mode($)!,
-    Filesystem:D :$root!,
-    Filesystem:D :$boot!,
-    Bool:D :lvm($)! where .so
-]
+#| C<DiskFilesystem[Filesystem::NILFS2]> contains NILFS2-specific
+#| configuration.
+my role DiskFilesystem[Filesystem:D $ where Filesystem::NILFS2]
 {
-    has Star::Config::Disk::Filesystem::Format[$root] $.root is required;
-    has Star::Config::Disk::Filesystem::Format[$boot] $.boot is required;
-    has Star::Config::Disk::Filesystem::Lvm:D $.lvm is required;
+    also does DiskFilesystemFormat[Filesystem::NILFS2];
 }
 
-# non-base mode with non-btrfs root, lvm disabled
-role Star::Config::Disk::Filesystem[
-    Mode:D :mode($)!,
-    Filesystem:D :$root!,
-    Filesystem:D :$boot!,
-    Bool :lvm($)!
-]
+#| C<DiskFilesystem[Filesystem::XFS]> contains XFS-specific configuration.
+my role DiskFilesystem[Filesystem:D $ where Filesystem::XFS]
 {
-    # lvm disabled
-    also does NilLvm;
+    also does DiskFilesystemFormat[Filesystem::XFS];
+}
 
-    has Star::Config::Disk::Filesystem::Format[$root] $.root is required;
-    has Star::Config::Disk::Filesystem::Format[$boot] $.boot is required;
+class Star::Config::Disk::Filesystem
+{
+    # TODO: implement C<multi method new> here.
 }
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
