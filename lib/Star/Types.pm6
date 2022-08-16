@@ -236,8 +236,8 @@ enum UdevProperty is export <
 
 =head2 Grammar
 
-#| C<TypesSubsetsGrammar> contains miscellaneous tokens and regexes for
-#| validating C<Star::Types> subsets.
+#| C<TypesSubsetsGrammar> contains tokens and regexes for validating
+#| C<Star::Types> subsets.
 my grammar TypesSubsetsGrammar
 {
     #| C<alnum-lower> matches a single lowercase alphanumeric character,
