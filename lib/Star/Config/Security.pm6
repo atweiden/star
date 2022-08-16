@@ -216,7 +216,7 @@ class Star::Config::Security::DmCrypt::Root
         self.^mixin(
             DmCryptRootVolume[$mode],
             # Detach dm-crypt encrypted root volume header for
-            # C<BootSecurityLevel::<2FA>>.
+            # C<BootSecurityLevel::<1FA>> and C<BootSecurityLevel::<2FA>>.
             DmCryptRootVolumeHeader
         ).bless(|%opts);
     }
