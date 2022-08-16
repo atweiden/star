@@ -1,7 +1,7 @@
 use v6;
 use Star::Constants;
 
-#| C<Star::Distro::Utils> is a class whose methods are designed for
+#| C<Star::System::Utils> is a class whose methods are designed for
 #| cross-distro, untyped interactions with third-party software pertaining
 #| to system settings, e.g. keymaps, locales, and time zones.
 unit class Star::System::Utils;
