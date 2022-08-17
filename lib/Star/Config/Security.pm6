@@ -1,24 +1,41 @@
 use v6;
 use Star::Types;
 
-my role DmCryptRootVolume[
-    #| C<$mode> is the dm-crypt encrypted root volume encryption mode.
-    #|
-    #| C<$mode> must be C<LUKS1> when C<DmCryptTarget::BOTH> and
-    #| C<BootSecurityLevel::BASE>, because GRUB is presently practically
-    #| speaking incapable of booting from volumes encrypted with any other
-    #| dm-crypt encryption mode. This isn't enforced by the type system
-    #| here, however, because even if C<DmCryptRootVolume>'s parametric
-    #| signature featured the necessary parameters C<DmCryptTarget> and
-    #| C<BootSecurityLevel> for detecting invalid configuration, invalid
-    #| attempts would merely raise the rather general exception
-    #| C<X::Role::Parametric::NoSuchCandidate>. While catching this
-    #| exception and subsequently handling it would be a viable option,
-    #| better to raise a specialized exception earlier on in the config
-    #| instantiation process.
-    DmCryptMode:D $mode
-    #= C<$mode> is assumed to be valid.
-]
+#| C<GetOpts> provides method C<get-opts> for returning a C<Hash> of
+#| attributes.
+my role GetOpts
+{
+    method get-opts(::?CLASS:D: --> Hash:D)
+    {
+        my List:D $attributes = self.^attributes(:local);
+        # Assign self to dynamic variable. Enables passing C<self> to
+        # method C<Attribute.get_value> in subroutine.
+        my $*self = self;
+        my %opts = get-opts(:$attributes);
+    }
+
+    multi sub get-opts(List:D :$attributes! --> Hash:D)
+    {
+        my Pair:D @opt = $attributes.map(-> Attribute:D $attribute {
+            get-opts(:$attribute);
+        });
+        my %opts = @opt.hash;
+    }
+
+    multi sub get-opts(Attribute:D :$attribute! --> Pair:D)
+    {
+        my Str:D $name = $attribute.name.substr(2);
+        my \value = $attribute.get_value($*self);
+        get-opts($name, value);
+    }
+
+    multi sub get-opts(Str:D $name, \value --> Pair:D)
+    {
+        my Pair:D $name-value = $name => value;
+    }
+}
+
+my role DmCryptRootVolumeAttributes
 {
     #| C<$.name> is the name of the dm-crypt encrypted root volume.
     #|
@@ -86,6 +103,28 @@ my role DmCryptRootVolume[
     #|
     #| See: C<man cryptsetup>.
     has Str $.sector-size;
+}
+
+my role DmCryptRootVolume[
+    #| C<$mode> is the dm-crypt encrypted root volume encryption mode.
+    #|
+    #| C<$mode> must be C<LUKS1> when C<DmCryptTarget::BOTH> and
+    #| C<BootSecurityLevel::BASE>, because GRUB is presently practically
+    #| speaking incapable of booting from volumes encrypted with any other
+    #| dm-crypt encryption mode. This isn't enforced by the type system
+    #| here, however, because even if C<DmCryptRootVolume>'s parametric
+    #| signature featured the necessary parameters C<DmCryptTarget> and
+    #| C<BootSecurityLevel> for detecting invalid configuration, invalid
+    #| attempts would merely raise the rather general exception
+    #| C<X::Role::Parametric::NoSuchCandidate>. While catching this
+    #| exception and subsequently handling it would be a viable option,
+    #| better to raise a specialized exception earlier on in the config
+    #| instantiation process.
+    DmCryptMode:D $mode
+    #= C<$mode> is assumed to be valid.
+]
+{
+    also does DmCryptRootVolumeAttributes;
 
     #| C<mode> returns the dm-crypt encryption mode to be used in the
     #| creation of the dm-crypt encrypted root volume.
@@ -101,16 +140,7 @@ my role DmCryptRootVolumeHeader
     has DmCryptRootVolumeHeader:D $.header is required;
 }
 
-my role DmCryptBootVolume[
-    #| C<$mode> is the dm-crypt encrypted boot volume encryption mode.
-    #|
-    #| C<$mode> must be C<LUKS1>, because GRUB is presently practically
-    #| speaking incapable of booting from volumes encrypted with any other
-    #| dm-crypt encryption mode. This isn't enforced by the type system
-    #| here, however, for API consistency (see: C<DmCryptRootVolume>).
-    DmCryptMode:D $mode
-    #= C<$mode> is assumed to be valid.
-]
+my role DmCryptBootVolumeAttributes
 {
     #| C<$.name> is the name of the dm-crypt encrypted boot volume.
     #|
@@ -178,6 +208,20 @@ my role DmCryptBootVolume[
     #|
     #| See: C<man cryptsetup>.
     has Str $.sector-size;
+}
+
+my role DmCryptBootVolume[
+    #| C<$mode> is the dm-crypt encrypted boot volume encryption mode.
+    #|
+    #| C<$mode> must be C<LUKS1>, because GRUB is presently practically
+    #| speaking incapable of booting from volumes encrypted with any other
+    #| dm-crypt encryption mode. This isn't enforced by the type system
+    #| here, however, for API consistency (see: C<DmCryptRootVolume>).
+    DmCryptMode:D $mode
+    #= C<$mode> is assumed to be valid.
+]
+{
+    also does DmCryptBootVolumeAttributes;
 
     #| C<mode> returns the dm-crypt encryption mode to be used in the
     #| creation of the dm-crypt encrypted boot volume.
@@ -185,75 +229,107 @@ my role DmCryptBootVolume[
 }
 
 class Star::Config::Security::DmCrypt::Root
+{...}
+
+#| C<Star::Config::Security::DmCrypt::Root::Opts> stores properly typed
+#| instantiation arguments for C<Star::Config::Security::DmCrypt::Root>,
+#| for passing to C<Star::Config::Security::DmCrypt::Root.new>. This is
+#| less error prone than perilously passing a C<Hash>.
+role Star::Config::Security::DmCrypt::Root::Opts[
+    BootSecurityLevel:D $ where elevated-bootsec($_)
+]
 {
-    multi method new(
-        DmCryptMode:D :$mode!,
-        BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_),
-        *%opts (
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
-            # and C<BootSecurityLevel::<2FA>>.
-            DmCryptRootVolumeHeader:D :header($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        )
+    also does DmCryptRootVolumeAttributes;
+    also does GetOpts;
+
+    has DmCryptMode:D $.mode is required;
+
+    #| C<header> attribute required for C<BootSecurityLevel::<1FA>> and
+    #| C<BootSecurityLevel::<2FA>>.
+    has DmCryptRootVolumeHeader:D $.header is required;
+
+    method Star::Config::Security::DmCrypt::Root(
+        ::?CLASS:D:
         --> Star::Config::Security::DmCrypt::Root:D
     )
     {
-        self.^mixin(
+        my %opts = self.get-opts;
+        my DmCryptMode:D $mode = %opts<mode>:delete;
+        Star::Config::Security::DmCrypt::Root.^mixin(
             DmCryptRootVolume[$mode],
-            # Detach dm-crypt encrypted root volume header for
-            # C<BootSecurityLevel::<1FA>> and C<BootSecurityLevel::<2FA>>.
+            # Detach dm-crypt encrypted root volume header.
             DmCryptRootVolumeHeader
         ).bless(|%opts);
     }
+}
 
-    multi method new(
-        DmCryptMode:D :$mode!,
-        BootSecurityLevel :boot-security-level($),
-        *%opts (
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        )
+role Star::Config::Security::DmCrypt::Root::Opts[
+    BootSecurityLevel:D $
+]
+{
+    also does DmCryptRootVolumeAttributes;
+    also does GetOpts;
+
+    has DmCryptMode:D $.mode is required;
+
+    method Star::Config::Security::DmCrypt::Root(
+        ::?CLASS:D:
         --> Star::Config::Security::DmCrypt::Root:D
     )
     {
-        self.^mixin(DmCryptRootVolume[$mode]).bless(|%opts);
+        my %opts = self.get-opts;
+        my DmCryptMode:D $mode = %opts<mode>:delete;
+        Star::Config::Security::DmCrypt::Root.^mixin(
+            DmCryptRootVolume[$mode]
+        ).bless(|%opts);
+    }
+}
+
+class Star::Config::Security::DmCrypt::Root
+{
+    method new(
+        Star::Config::Security::DmCrypt::Root::Opts:D $opts,
+        --> Star::Config::Security::DmCrypt::Root:D
+    )
+    {
+        Star::Config::Security::DmCrypt::Root($opts);
+    }
+}
+
+class Star::Config::Security::DmCrypt::Boot
+{...}
+
+#| C<Star::Config::Security::DmCrypt::Boot::Opts> stores properly typed
+#| instantiation arguments for C<Star::Config::Security::DmCrypt::Boot>,
+#| for passing to C<Star::Config::Security::DmCrypt::Boot.new>. This is
+#| less error prone than perilously passing a C<Hash>.
+role Star::Config::Security::DmCrypt::Boot::Opts
+{
+    also does DmCryptBootVolumeAttributes;
+
+    has DmCryptMode:D $.mode is required;
+
+    method Star::Config::Security::DmCrypt::Boot(
+        ::?CLASS:D:
+        --> Star::Config::Security::DmCrypt::Boot:D
+    )
+    {
+        my %opts = self.get-opts;
+        my DmCryptMode:D $mode = %opts<mode>:delete;
+        Star::Config::Security::DmCrypt::Boot.^mixin(
+            DmCryptBootVolume[$mode]
+        ).bless(|%opts);
     }
 }
 
 class Star::Config::Security::DmCrypt::Boot
 {
     method new(
-        DmCryptMode:D :$mode!,
-        *%opts (
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        )
+        Star::Config::Security::DmCrypt::Boot::Opts:D $opts,
         --> Star::Config::Security::DmCrypt::Boot:D
     )
     {
-        self.^mixin(DmCryptBootVolume[$mode]).bless(|%opts);
+        Star::Config::Security::DmCrypt::Boot($opts);
     }
 }
 
@@ -269,86 +345,15 @@ my role DmCryptBoot
 
 class Star::Config::Security::DmCrypt
 {
-    # C<DmCryptTarget::BOTH> {{{
-
     multi method new(
-        %opts-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
-            # and C<BootSecurityLevel::<2FA>>.
-            DmCryptRootVolumeHeader:D :header($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        %opts-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
-        BootSecurityLevel:D :$boot-security-level! where elevated-bootsec($_)
+        DmCryptTarget::BOTH,
+        Star::Config::Security::DmCrypt::Root::Opts:D $r,
+        Star::Config::Security::DmCrypt::Boot::Opts:D $b
         --> Star::Config::Security::DmCrypt:D
     )
     {
-        my Star::Config::Security::DmCrypt::Root $root-volume .=
-            new(|%opts-root, :$boot-security-level);
-        my Star::Config::Security::DmCrypt::Boot $boot-volume .=
-            new(|%opts-boot);
-        self.^mixin(
-            DmCryptRoot,
-            DmCryptBoot
-        ).bless(:$root-volume, :$boot-volume);
-    }
-
-    # Special case for C<DiskEncryption::DMFS>.
-    multi method new(
-        %opts-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        %opts-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
-        BootSecurityLevel:D :$boot-security-level!
-        --> Star::Config::Security::DmCrypt:D
-    )
-    {
-        my Star::Config::Security::DmCrypt::Root $root-volume .=
-            new(|%opts-root, :$boot-security-level);
-        my Star::Config::Security::DmCrypt::Boot $boot-volume .=
-            new(|%opts-boot);
+        my Star::Config::Security::DmCrypt::Root $root-volume .= new($r);
+        my Star::Config::Security::DmCrypt::Boot $boot-volume .= new($b);
         self.^mixin(
             DmCryptRoot,
             DmCryptBoot
@@ -356,107 +361,34 @@ class Star::Config::Security::DmCrypt
     }
 
     multi method new(
-        %opts-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
-        BootSecurityLevel:D :$boot-security-level!
+        DmCryptTarget::BOTH,
+        Star::Config::Security::DmCrypt::Root::Opts:D $r
         --> Star::Config::Security::DmCrypt:D
     )
     {
-        my Star::Config::Security::DmCrypt::Root $root-volume .=
-            new(|%opts-root, :$boot-security-level);
-        self.^mixin(DmCryptRoot).bless(:$root-volume);
-    }
-
-    # end C<DmCryptTarget::BOTH> }}}
-    # C<DmCryptTarget::ROOT> {{{
-
-    multi method new(
-        %opts-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
-            # and C<BootSecurityLevel::<2FA>>.
-            DmCryptRootVolumeHeader:D :header($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
-        BootSecurityLevel:D :$boot-security-level! where elevated-bootsec($_)
-        --> Star::Config::Security::DmCrypt:D
-    )
-    {
-        my Star::Config::Security::DmCrypt::Root $root-volume .=
-            new(|%opts-root, :$boot-security-level);
+        my Star::Config::Security::DmCrypt::Root $root-volume .= new($r);
         self.^mixin(DmCryptRoot).bless(:$root-volume);
     }
 
     multi method new(
-        %opts-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
-        BootSecurityLevel:D :$boot-security-level!
+        DmCryptTarget::ROOT,
+        Star::Config::Security::DmCrypt::Root::Opts:D $r
         --> Star::Config::Security::DmCrypt:D
     )
     {
-        my Star::Config::Security::DmCrypt::Root $root-volume .=
-            new(|%opts-root, :$boot-security-level);
+        my Star::Config::Security::DmCrypt::Root $root-volume .= new($r);
         self.^mixin(DmCryptRoot).bless(:$root-volume);
     }
 
-    # end C<DmCryptTarget::ROOT> }}}
-    # C<DmCryptTarget::BOOT> {{{
-
     multi method new(
-        %opts-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOOT,
-        BootSecurityLevel:D :boot-security-level($)
+        DmCryptTarget::BOOT,
+        Star::Config::Security::DmCrypt::Boot::Opts:D $b
         --> Star::Config::Security::DmCrypt:D
     )
     {
-        my Star::Config::Security::DmCrypt::Boot $boot-volume .=
-            new(|%opts-boot);
+        my Star::Config::Security::DmCrypt::Boot $boot-volume .= new($b);
         self.^mixin(DmCryptBoot).bless(:$boot-volume);
     }
-
-    # end C<DmCryptTarget::BOOT> }}}
 }
 
 class Star::Config::Security::Filesystem
@@ -477,7 +409,7 @@ class Star::Config::Security
     # C<DiskEncryption::NONE> {{{
 
     multi method new(
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::NONE,
+        DiskEncryption::NONE
         --> Star::Config::Security::DmCrypt:D
     )
     {
@@ -487,172 +419,73 @@ class Star::Config::Security
     # end C<DiskEncryption::NONE> }}}
     # C<DiskEncryption::DM-CRYPT> {{{
 
-    # --- C<DmCryptTarget::BOTH> {{{
-
     multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
-            # and C<BootSecurityLevel::<2FA>>.
-            DmCryptRootVolumeHeader:D :header($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        %opts-dm-crypt-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DM-CRYPT,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
-            BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_)
-        )
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget::BOTH,
+        Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<1FA>] $r,
+        Star::Config::Security::DmCrypt::Boot::Opts[BootSecurityLevel::<1FA>] $b
         --> Star::Config::Security::DmCrypt:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, %opts-dm-crypt-boot, |%opts);
+            new(DmCryptTarget::BOTH, $r, $b);
         self.^mixin(SecurityDmCrypt).bless(:$dm-crypt);
     }
 
     multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DM-CRYPT,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
-            BootSecurityLevel:D :boot-security-level($)!
-        )
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget::BOTH,
+        Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<2FA>] $r,
+        Star::Config::Security::DmCrypt::Boot::Opts[BootSecurityLevel::<2FA>] $b
         --> Star::Config::Security::DmCrypt:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, |%opts);
-        self.^mixin(SecurityDmCrypt).bless(:$dm-crypt);
-    }
-
-    # --- end C<DmCryptTarget::BOTH> }}}
-    # --- C<DmCryptTarget::ROOT> {{{
-
-    multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
-            # and C<BootSecurityLevel::<2FA>>.
-            DmCryptRootVolumeHeader:D :header($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DM-CRYPT,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
-            BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_)
-        )
-        --> Star::Config::Security::DmCrypt:D
-    )
-    {
-        my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, |%opts);
+            new(DmCryptTarget::BOTH, $r, $b);
         self.^mixin(SecurityDmCrypt).bless(:$dm-crypt);
     }
 
     multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DM-CRYPT,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
-            BootSecurityLevel:D :boot-security-level($)!
-        )
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget::BOTH,
+        Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::BASE] $r
         --> Star::Config::Security::DmCrypt:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, |%opts);
+            new(DmCryptTarget::BOTH, $r);
         self.^mixin(SecurityDmCrypt).bless(:$dm-crypt);
     }
-
-    # --- end C<DmCryptTarget::ROOT> }}}
-    # --- C<DmCryptTarget::BOOT> {{{
 
     multi method new(
-        %opts-dm-crypt-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DM-CRYPT,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOOT,
-            BootSecurityLevel:D :boot-security-level($)
-        )
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget::ROOT,
+        Star::Config::Security::DmCrypt::Root::Opts:D $r
         --> Star::Config::Security::DmCrypt:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-boot, |%opts);
+            new(DmCryptTarget::ROOT, $r);
         self.^mixin(SecurityDmCrypt).bless(:$dm-crypt);
     }
 
-    # --- end C<DmCryptTarget::BOOT> }}}
+    multi method new(
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget::BOOT,
+        Star::Config::Security::DmCrypt::Boot::Opts:D $b
+        --> Star::Config::Security::DmCrypt:D
+    )
+    {
+        my Star::Config::Security::DmCrypt $dm-crypt .=
+            new(DmCryptTarget::BOOT, $b);
+        self.^mixin(SecurityDmCrypt).bless(:$dm-crypt);
+    }
 
     # end C<DiskEncryption::DM-CRYPT> }}}
     # C<DiskEncryption::FILESYSTEM> {{{
 
     multi method new(
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::FILESYSTEM,
-        *%opts (
-            BootSecurityLevel:D :boot-security-level($)
-        )
+        DiskEncryption::FILESYSTEM
         --> Star::Config::Security::DmCrypt:D
     )
     {
@@ -663,213 +496,58 @@ class Star::Config::Security
     # end C<DiskEncryption::FILESYSTEM> }}}
     # C<DiskEncryption::DMFS> {{{
 
-    # --- C<DmCryptTarget::BOTH> {{{
-
     multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
-            # and C<BootSecurityLevel::<2FA>>.
-            DmCryptRootVolumeHeader:D :header($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        %opts-dm-crypt-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DMFS,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
-            BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_)
-        )
+        DiskEncryption::DMFS,
+        DmCryptTarget::BOTH,
+        Star::Config::Security::DmCrypt::Root::Opts:D $r,
+        Star::Config::Security::DmCrypt::Boot::Opts:D $b
         --> Star::Config::Security::DmCrypt:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, %opts-dm-crypt-boot, |%opts);
+            new(DmCryptTarget::BOTH, $r, $b);
         my Star::Config::Security::Filesystem $filesystem .= new;
         self.^mixin(
             SecurityDmCrypt,
             SecurityFilesystem
         ).bless(:$dm-crypt, :$filesystem);
     }
-
-    # This would only require a dm-crypt encrypted root volume if we had
-    # C<DiskEncryption::DM-CRYPT> here instead of C<DiskEncryption::DMFS>.
-    multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        # Separate dm-crypt encrypted boot volume needed, because dm-crypt
-        # encrypted root volume I<filesystem> will be encrypted with the
-        # filesystem's native encryption implementation, which GRUB can't
-        # decrypt.
-        %opts-dm-crypt-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DMFS,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOTH,
-            # Regardless of C<BootSecurityLevel>, we need a separate
-            # dm-crypt encrypted boot partition. N.B. This multi method
-            # signature only differs from the multi method signature which
-            # precedes it by not requiring a C<header> key be passed in
-            # C<%opts-dm-crypt-root>. C<header> attribute required for
-            # C<BootSecurityLevel::<1FA>> and C<BootSecurityLevel::<2FA>>.
-            BootSecurityLevel:D :boot-security-level($)!
-        )
-        --> Star::Config::Security::DmCrypt:D
-    )
-    {
-        my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, %opts-dm-crypt-boot, |%opts);
-        my Star::Config::Security::Filesystem $filesystem .= new;
-        self.^mixin(
-            SecurityDmCrypt,
-            SecurityFilesystem
-        ).bless(:$dm-crypt, :$filesystem);
-    }
-
-    # --- end C<DmCryptTarget::BOTH> }}}
-    # --- C<DmCryptTarget::ROOT> {{{
 
     # A separate boot partition is needed for C<DiskEncryption::DMFS> plus
     # C<DmCryptTarget::ROOT>, but it won't be encrypted. Hence, we don't
-    # want C<%opts-dm-crypt-boot>.
+    # want C<Star::Config::Security::DmCrypt::Boot::Opts>.
     multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            # C<header> attribute required for C<BootSecurityLevel::<1FA>>
-            # and C<BootSecurityLevel::<2FA>>.
-            DmCryptRootVolumeHeader:D :header($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DMFS,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
-            BootSecurityLevel:D :boot-security-level($)! where elevated-bootsec($_)
-        )
+        DiskEncryption::DMFS,
+        DmCryptTarget::ROOT,
+        Star::Config::Security::DmCrypt::Root::Opts:D $r
         --> Star::Config::Security::DmCrypt:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, |%opts);
+            new(DmCryptTarget::ROOT, $r);
+        my Star::Config::Security::Filesystem $filesystem .= new;
+        self.^mixin(
+            SecurityDmCrypt,
+            SecurityFilesystem
+        ).bless(:$dm-crypt, :$filesystem);
+
+    }
+
+    multi method new(
+        DiskEncryption::DMFS,
+        DmCryptTarget::BOOT,
+        Star::Config::Security::DmCrypt::Boot::Opts:D $b
+        --> Star::Config::Security::DmCrypt:D
+    )
+    {
+        my Star::Config::Security::DmCrypt $dm-crypt .=
+            new(DmCryptTarget::BOOT, $b);
         my Star::Config::Security::Filesystem $filesystem .= new;
         self.^mixin(
             SecurityDmCrypt,
             SecurityFilesystem
         ).bless(:$dm-crypt, :$filesystem);
     }
-
-    # Similar to the multi method signature which precedes it, a separate
-    # boot partition is needed here, but it's unencrypted. Hence, we don't
-    # want C<%opts-dm-crypt-boot>.
-    multi method new(
-        %opts-dm-crypt-root (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptRootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DMFS,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::ROOT,
-            BootSecurityLevel:D :boot-security-level($)!
-        )
-        --> Star::Config::Security::DmCrypt:D
-    )
-    {
-        my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-root, |%opts);
-        my Star::Config::Security::Filesystem $filesystem .= new;
-        self.^mixin(
-            SecurityDmCrypt,
-            SecurityFilesystem
-        ).bless(:$dm-crypt, :$filesystem);
-    }
-
-    # --- end C<DmCryptTarget::ROOT> }}}
-    # --- C<DmCryptTarget::BOOT> {{{
-
-    multi method new(
-        %opts-dm-crypt-boot (
-            DmCryptMode:D :mode($)!,
-            DeviceName:D :name($)!,
-            DmCryptBootVolumeKeyFile:D :key-file($)!,
-            Str:D :cipher($)!,
-            Str:D :hash($)!,
-            Str:D :iter-time($)!,
-            Str:D :key-size($)!,
-            DmCryptVolumePassword :pass($),
-            Str :offset($),
-            Str :sector-size($)
-        ),
-        DiskEncryption:D :disk-encryption($)! where DiskEncryption::DMFS,
-        *%opts (
-            DmCryptTarget:D :dm-crypt-target($)! where DmCryptTarget::BOOT,
-            BootSecurityLevel:D :boot-security-level($)
-        )
-        --> Star::Config::Security::DmCrypt:D
-    )
-    {
-        my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(%opts-dm-crypt-boot, |%opts);
-        my Star::Config::Security::Filesystem $filesystem .= new;
-        self.^mixin(
-            SecurityDmCrypt,
-            SecurityFilesystem
-        ).bless(:$dm-crypt, :$filesystem);
-    }
-
-    # --- end C<DmCryptTarget::BOOT> }}}
 
     # end C<DiskEncryption::DMFS> }}}
 }
