@@ -1,4 +1,5 @@
 use v6;
+use Star::Config::Utils;
 use Star::Types;
 
 #| C<GetOpts> provides method C<get-opts> for returning a C<Hash> of
@@ -551,9 +552,5 @@ class Star::Config::Security
 
     # end C<DiskEncryption::DMFS> }}}
 }
-
-multi sub elevated-bootsec(BootSecurityLevel::<1FA> --> True) {*}
-multi sub elevated-bootsec(BootSecurityLevel::<2FA> --> True) {*}
-multi sub elevated-bootsec($ --> False) {*}
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
