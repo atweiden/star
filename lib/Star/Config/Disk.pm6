@@ -189,6 +189,21 @@ class Star::Config::Disk
     # The root partition always exists.
     also does DiskRoot;
 
+    # Root and boot filesystems differ, LVM disabled.
+    multi method new(
+        Filesystem:D $x,
+        Filesystem:D $y where $_ != $x,
+        Star::Config::Disk::Root::Opts:D $r (:lvm($) where .not),
+        Star::Config::Disk::Boot::Opts:D $b,
+        *@
+        --> Star::Config::Disk:D
+    )
+    {
+        my Star::Config::Disk::Root $root .= new($r);
+        my Star::Config::Disk::Boot $boot .= new($b);
+        self.bless(:$root, :$boot);
+    }
+
     multi method new(
         DiskEncryption::NONE,
         Star::Config::Disk::Root::Opts:D $r,
