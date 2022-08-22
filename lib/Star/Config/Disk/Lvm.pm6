@@ -4,8 +4,15 @@ use X::Star::Config::Disk;
 unit class Star::Config::Disk::Lvm;
 
 #| C<$.volume-group-name> is the name for the LVM volume group.
-has Str:D $.volume-group-name =
-    volume-group-name($Star::Config::Constants::VOLUME-GROUP-NAME);
+has Str:D $.volume-group-name is required;
+
+method new(
+    Str:D :$volume-group-name = $Star::Config::Constants::VOLUME-GROUP-NAME
+    --> Star::Config::Disk::Lvm:D
+)
+{
+    self.bless(:volume-group-name(volume-group-name($volume-group-name)));
+}
 
 #| C<volume-group-name> scans C</dev> for device names conflicting with
 #| C<$volume-group-name> and adjusts C<$volume-group-name> if necessary.

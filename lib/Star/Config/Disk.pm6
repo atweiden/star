@@ -1,83 +1,164 @@
 use v6;
 use Star::Config::Disk::Filesystem;
 use Star::Config::Disk::Lvm;
+use Star::Config::Roles;
 use Star::Config::Utils;
 use Star::Types;
 
+my role RootAttributes
+{
+    #| C<$.device> is the target block device for the root filesystem.
+    has Str:D $.device is required;
+
+    #| C<$.filesystem> contains settings for the root filesystem.
+    has Star::Config::Disk::Filesystem:D $.filesystem is required;
+}
+
 my role RootLvm
 {
-    #| C<$.lvm> is the LVM configuration for the root partition.
+    #| C<$.lvm> contains LVM settings for the root filesystem.
     has Star::Config::Disk::Lvm:D $.lvm is required;
+}
+
+my role Root[LvmOnRoot:D $lvm-on]
+{
+    also does RootAttributes;
+
+    method lvm-on(--> LvmOnRoot:D) { $lvm-on }
+}
+
+class Star::Config::Disk::Root
+{...}
+
+# Disable LVM.
+role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::NO]
+{
+    also does RootAttributes;
+    also does Star::Config::Roles::GetOpts;
+
+    method Star::Config::Disk::Root(::?CLASS:D: --> Star::Config::Disk::Root:D)
+    {
+        Star::Config::Disk::Root.^mixin(
+            Root[$lvm-on]
+        ).bless(|self.get-opts);
+    }
+}
+
+# Enable LVM. Use only with LVM-compatible C<Filesystem>s.
+role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::YES]
+{
+    also does RootAttributes;
+    also does RootLvm;
+    also does Star::Config::Roles::GetOpts;
+
+    method Star::Config::Disk::Root(::?CLASS:D: --> Star::Config::Disk::Root:D)
+    {
+        Star::Config::Disk::Root.^mixin(
+            Root[$lvm-on],
+            RootLvm
+        ).bless(|self.get-opts);
+    }
 }
 
 class Star::Config::Disk::Root
 {
-    #| C<$.device> is the target block device for the root partition.
-    has Str:D $.device is required;
+    method new(
+        Star::Config::Disk::Root::Opts:D $r
+        --> Star::Config::Disk::Root:D
+    )
+    {
+        Star::Config::Disk::Root($r);
+    }
+}
 
-    #| C<$.filesystem> is the root partition filesystem configuration.
+my role BootAttributes
+{
+    #| C<$.filesystem> contains settings for the boot filesystem.
     has Star::Config::Disk::Filesystem:D $.filesystem is required;
-
-    multi method new(
-        Filesystem:D $fs where lvm-compatible-filesystem($_),
-        Star::Config::Disk::Lvm::Opts:D $l,
-        Str:D :$device! where .so
-        --> Star::Config::Disk::Root:D
-    )
-    {
-        my Star::Config::Disk::Filesystem $filesystem .= new($fs);
-        my Star::Config::Disk::Lvm $lvm .= new($l);
-        self.^mixin(RootLvm).bless(:$device, :$filesystem, :$lvm);
-    }
-
-    multi method new(
-        Filesystem:D $fs,
-        Str:D :$device! where .so
-        --> Star::Config::Disk::Root:D
-    )
-    {
-        my Star::Config::Disk::Filesystem $filesystem .= new($fs);
-        self.bless(:$device, :$filesystem);
-    }
 }
 
 my role BootDevice
 {
-    #| C<$.device> is the target block device for the boot partition.
+    #| C<$.device> is the target block device for the boot filesystem.
     #|
     #| N.B. This device must differ from the target block device for the
     #| root partition.
     has Str:D $.device is required;
 }
 
+my role Boot[RelocateBootTo:D $location]
+{
+    also does BootAttributes;
+
+    method location(--> RelocateBootTo:D) { $location }
+}
+
+class Star::Config::Disk::Boot
+{...}
+
+# Useful whenever a separate boot device is needed. In which case, both
+# C<$.filesystem> and C<$.device> are required. The caller must ensure
+# boot's C<$.device> differs from root's.
+role Star::Config::Disk::Boot::Opts[
+    RelocateBootTo:D $location where RelocateBootTo::SEPARATE-DEVICE
+]
+{
+    also does BootAttributes;
+    also does BootDevice;
+    also does Star::Config::Roles::GetOpts;
+
+    method Star::Config::Disk::Boot(::?CLASS:D: --> Star::Config::Disk::Boot:D)
+    {
+        Star::Config::Disk::Boot.^mixin(
+            Boot[$location],
+            BootDevice
+        ).bless(|self.get-opts);
+    }
+}
+
+# Useful whenever a separate boot partition is needed on the root device.
+# In which case, C<$.filesystem> is required.
+role Star::Config::Disk::Boot::Opts[
+    RelocateBootTo:D $location where RelocateBootTo::SEPARATE-PARTITION
+]
+{
+    also does BootAttributes;
+    also does Star::Config::Roles::GetOpts;
+
+    method Star::Config::Disk::Boot(::?CLASS:D: --> Star::Config::Disk::Boot:D)
+    {
+        Star::Config::Disk::Boot.^mixin(
+            Boot[$location]
+        ).bless(|self.get-opts);
+    }
+}
+
+# Useful if the root and boot filesystem formats differ, and LVM is
+# enabled. In which case, the boot filesystem is created on an LVM logical
+# volume, rather than on a separate partition.
+role Star::Config::Disk::Boot::Opts[
+    RelocateBootTo:D $location where RelocateBootTo::LVM-LOGICAL-VOLUME
+]
+{
+    also does BootAttributes;
+    also does Star::Config::Roles::GetOpts;
+
+    method Star::Config::Disk::Boot(::?CLASS:D: --> Star::Config::Disk::Boot:D)
+    {
+        Star::Config::Disk::Boot.^mixin(
+            Boot[$location]
+        ).bless(|self.get-opts);
+    }
+}
+
 class Star::Config::Disk::Boot
 {
-    #| C<$.filesystem> is the boot partition filesystem configuration.
-    has Star::Config::Disk::Filesystem:D $.filesystem is required;
-
-    # Useful whenever a separate boot partition is needed (see:
-    # C<Star::Config::Disk>). In which case, C<$device> is required. The
-    # caller must ensure its value differs from that of the root device.
-    multi method new(
-        Filesystem:D $fs,
-        Str:D :$device! where .so
+    method new(
+        Star::Config::Disk::Boot::Opts:D $b
         --> Star::Config::Disk::Boot:D
     )
     {
-        my Star::Config::Disk::Filesystem $filesystem .= new($fs);
-        self.^mixin(BootDevice).bless(:$device, :$filesystem);
-    }
-
-    # Useful if the root and boot filesystem formats differ, and LVM is
-    # enabled. In which case, the boot filesystem is created on an LVM
-    # logical volume, rather than on a separate partition.
-    multi method new(
-        Filesystem:D $fs
-        --> Star::Config::Disk::Boot:D
-    )
-    {
-        my Star::Config::Disk::Filesystem $filesystem .= new($fs);
-        self.bless(:$filesystem);
+        Star::Config::Disk::Boot($b);
     }
 }
 
@@ -182,19 +263,19 @@ my role DiskBoot
 #|
 #| =end item
 #|
-#| Boot partition settings will only be available if one of the above
+#| Boot filesystem settings will only be available if one of the above
 #| conditions is met.
 class Star::Config::Disk
 {
     # The root partition always exists.
     also does DiskRoot;
 
-    # Root and boot filesystems differ, LVM disabled.
+    # The root and boot filesystem formats differ, and LVM is disabled.
     multi method new(
-        Filesystem:D $x,
-        Filesystem:D $y where $_ != $x,
-        Star::Config::Disk::Root::Opts:D $r (:lvm($) where .not),
-        Star::Config::Disk::Boot::Opts:D $b,
+        Star::Config::Disk::Root::Opts[LvmOnRoot::NO] $r,
+        Star::Config::Disk::Boot::Opts:D $b where {
+            .filesystem.format != $r.filesystem.format
+        },
         *@
         --> Star::Config::Disk:D
     )
@@ -204,9 +285,57 @@ class Star::Config::Disk
         self.bless(:$root, :$boot);
     }
 
+    # The filesystem's native encryption implementation is used.
     multi method new(
-        DiskEncryption::NONE,
         Star::Config::Disk::Root::Opts:D $r,
+        Star::Config::Disk::Boot::Opts:D $b,
+        DiskEncryption:D $ where filesystem-encryption($_),
+        *@
+        --> Star::Config::Disk:D
+    )
+    {
+        my Star::Config::Disk::Root $root .= new($r);
+        my Star::Config::Disk::Boot $boot .= new($b);
+        self.^mixin(DiskBoot).bless(:$root, :$boot);
+    }
+
+    # dm-crypt encryption is used to encrypt the root or boot partition
+    # only.
+    multi method new(
+        Star::Config::Disk::Root::Opts:D $r,
+        Star::Config::Disk::Boot::Opts:D $b,
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget:D $ where dm-crypt-target-root-or-boot($_),
+        *@
+        --> Star::Config::Disk:D
+    )
+    {
+        my Star::Config::Disk::Root $root .= new($r);
+        my Star::Config::Disk::Boot $boot .= new($b);
+        self.^mixin(DiskBoot).bless(:$root, :$boot);
+    }
+
+    # dm-crypt encryption is used for encrypting the root and boot
+    # partitions together with an elevated boot security level.
+    multi method new(
+        Star::Config::Disk::Root::Opts:D $r,
+        Star::Config::Disk::Boot::Opts:D $b,
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget::BOTH,
+        BootSecurityLevel:D $ where elevated-bootsec($_),
+        *@
+        --> Star::Config::Disk:D
+    )
+    {
+        my Star::Config::Disk::Root $root .= new($r);
+        my Star::Config::Disk::Boot $boot .= new($b);
+        self.^mixin(DiskBoot).bless(:$root, :$boot);
+    }
+
+    multi method new(
+        Star::Config::Disk::Root::Opts:D $r,
+        DiskEncryption::DM-CRYPT,
+        DmCryptTarget::BOTH,
         *@
         --> Star::Config::Disk:D
     )
@@ -216,51 +345,8 @@ class Star::Config::Disk
     }
 
     multi method new(
-        DiskEncryption:D $ where filesystem-encryption($_),
         Star::Config::Disk::Root::Opts:D $r,
-        Star::Config::Disk::Boot::Opts:D $b,
-        *@
-        --> Star::Config::Disk:D
-    )
-    {
-        my Star::Config::Disk::Root $root .= new($r);
-        my Star::Config::Disk::Boot $boot .= new($b);
-        self.^mixin(DiskBoot).bless(:$root, :$boot);
-    }
-
-    multi method new(
-        DiskEncryption::DM-CRYPT,
-        DmCryptTarget:D $ where dm-crypt-target-root-or-boot($_),
-        Star::Config::Disk::Root::Opts:D $r,
-        Star::Config::Disk::Boot::Opts:D $b,
-        *@
-        --> Star::Config::Disk:D
-    )
-    {
-        my Star::Config::Disk::Root $root .= new($r);
-        my Star::Config::Disk::Boot $boot .= new($b);
-        self.^mixin(DiskBoot).bless(:$root, :$boot);
-    }
-
-    multi method new(
-        DiskEncryption::DM-CRYPT,
-        DmCryptTarget::BOTH,
-        BootSecurityLevel:D $ where elevated-bootsec($_),
-        Star::Config::Disk::Root::Opts:D $r,
-        Star::Config::Disk::Boot::Opts:D $b,
-        *@
-        --> Star::Config::Disk:D
-    )
-    {
-        my Star::Config::Disk::Root $root .= new($r);
-        my Star::Config::Disk::Boot $boot .= new($b);
-        self.^mixin(DiskBoot).bless(:$root, :$boot);
-    }
-
-    multi method new(
-        DiskEncryption::DM-CRYPT,
-        DmCryptTarget::BOTH,
-        Star::Config::Disk::Root::Opts:D $r,
+        DiskEncryption::NONE,
         *@
         --> Star::Config::Disk:D
     )
@@ -280,13 +366,5 @@ multi sub filesystem-encryption(DiskEncryption::NONE --> False) {*}
 multi sub filesystem-encryption(DiskEncryption::DM-CRYPT --> False) {*}
 multi sub filesystem-encryption(DiskEncryption::FILESYSTEM --> True) {*}
 multi sub filesystem-encryption(DiskEncryption::DMFS --> True) {*}
-
-multi sub lvm-compatible-filesystem(Filesystem::BTRFS --> False) {*}
-multi sub lvm-compatible-filesystem(Filesystem::EXT2 --> True) {*}
-multi sub lvm-compatible-filesystem(Filesystem::EXT3 --> True) {*}
-multi sub lvm-compatible-filesystem(Filesystem::EXT4 --> True) {*}
-multi sub lvm-compatible-filesystem(Filesystem::F2FS --> True) {*}
-multi sub lvm-compatible-filesystem(Filesystem::NILFS2 --> True) {*}
-multi sub lvm-compatible-filesystem(Filesystem::XFS --> True) {*}
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:

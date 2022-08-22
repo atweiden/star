@@ -302,6 +302,19 @@ enum Libc is export <
     MUSL
 >;
 
+#| C<LvmOnRoot> is an enum whose variants represent whether LVM is enabled
+#| on the root device.
+#|
+#| Exists as a workaround for limitations of C<Bool> in parameterized role
+#| signatures.
+#|
+#| =item C<NO>: Disable LVM on root device
+#| =item C<YES>: Enable LVM on root device
+enum LvmOnRoot is export <
+    NO
+    YES
+>;
+
 #| C<Processor> is an enum whose variants represent the different types
 #| of x86 processors supported by Star.
 #|
@@ -310,6 +323,18 @@ enum Libc is export <
 enum Processor is export <
     AMD
     INTEL
+>;
+
+#| CRelocateBootTo> is an enum whose variants represent where to relocate
+#| C</boot> to.
+#|
+#| =item C<LVM-LOGICAL-VOLUME>: Relocate C</boot> to LVM logical volume
+#| =item C<SEPARATE-PARTITION>: Relocate C</boot> to separate partition
+#| =item C<SEPARATE-DEVICE>: Relocate C</boot> to separate device
+enum RelocateBootTo is export <
+    LVM-LOGICAL-VOLUME
+    SEPARATE-PARTITION
+    SEPARATE-DEVICE
 >;
 
 #| C<SecondFactor> is an enum whose variants represent the different

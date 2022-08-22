@@ -56,7 +56,10 @@ my role DiskFilesystem[Filesystem:D $ where Filesystem::XFS]
 
 class Star::Config::Disk::Filesystem
 {
-    # TODO: implement C<multi method new> here.
+    method new(Filesystem:D $filesystem --> Star::Config::Disk::Filesystem:D)
+    {
+        self.^mixin(DiskFilesystem[$filesystem]).bless;
+    }
 }
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
