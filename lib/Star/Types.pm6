@@ -11,11 +11,12 @@ my \Utils = Star::System::Utils;
 #| boot security levels supported by Star.
 #|
 #| =for item1
-#| C<BASE>: One or two encrypted partitions on single device, boot, root,
-#| or both. When C</boot> is stored outside the root partition, it and/or
-#| the root partition may be encrypted (see: C<DmCryptTarget>). When
-#| C</boot> is stored inside the root partition, C</boot> is encrypted
-#| alongside the rest of the system.
+#| C<BASE>: One or two encrypted partitions on single device - one for
+#| C</> and one for </boot>, or one shared partition for both C</> and
+#| C</boot>. When C</boot> is on a separate partition from C</>, its
+#| partition and/or C</>'s partition may be encrypted (see:
+#| C<DmCryptTarget>). When C</boot> is stored in the root partition,
+#| however, C</boot> is encrypted along with the rest of the system.
 #|
 #| =begin item1
 #|
@@ -23,10 +24,10 @@ my \Utils = Star::System::Utils;
 #| C<DiskEncryption::DM-CRYPT> (or C<DiskEncryption::DMFS>) and either
 #| C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>.
 #|
-#| Two partitions on single device, one root partition, one boot
-#| partition. The boot partition may or may not be encrypted, depending.
-#| The root partition is encrypted and headerless, its header detached
-#| and stored in the boot partition as applicable.
+#| Two partitions on single device, one for C</> and one for C</boot>.
+#| C</boot>'s partition may or may not be encrypted, depending. C</>'s
+#| partition is encrypted and headerless, its header detached and stored
+#| in C</boot>'s partition as applicable.
 #|
 #| =end item1
 #|
@@ -37,28 +38,30 @@ my \Utils = Star::System::Utils;
 #|
 #| C<BootSecurityLevel::<2FA>> can't be used with
 #| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
-#| C<SecondFactor::FIDO2>, because no bootloader at present is able to
-#| decrypt a dm-crypt encrypted boot partition using FIDO2 during system
-#| startup. The second factor mechanism would be of no use.
-#|
-#| C<BootSecurityLevel::<2FA>> can't be used with
-#| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
-#| C<SecondFactor::KEY>, because no bootloader at present is able to
-#| decrypt a dm-crypt encrypted boot partition using an external key file
-#| during system startup. The second factor mechanism would be of no use.
-#|
-#| C<BootSecurityLevel::<2FA>> can't be used with
-#| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
-#| C<SecondFactor::MORT>, because no bootloader at present is able to
-#| decrypt a headerless dm-crypt encrypted boot partition during system
-#| startup.
-#|
-#| C<BootSecurityLevel::<2FA>> can't be used with
-#| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
-#| C<SecondFactor::PKCS>, because no bootloader at present is able to
-#| decrypt a dm-crypt encrypted boot partition using a PKCS#11-compatible
-#| security token or smart card during system startup. The second factor
+#| C<SecondFactor::FIDO2>, because this would only encrypt C</boot>, and
+#| no bootloader at present is able to decrypt a dm-crypt encrypted
+#| C</boot> partition using FIDO2 during system startup. The second factor
 #| mechanism would be of no use.
+#|
+#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
+#| C<SecondFactor::KEY>, because this would only encrypt C</boot>, and no
+#| bootloader at present is able to decrypt a dm-crypt encrypted C</boot>
+#| partition using an external key file during system startup. The second
+#| factor mechanism would be of no use.
+#|
+#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
+#| C<SecondFactor::MORT>, because this would only encrypt C</boot>, and no
+#| bootloader at present is able to decrypt a headerless dm-crypt
+#| encrypted C</boot> partition during system startup.
+#|
+#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
+#| C<SecondFactor::PKCS>, because this would only encrypt C</boot>, and no
+#| bootloader at present is able to decrypt a dm-crypt encrypted C</boot>
+#| partition using a PKCS#11-compatible security token or smart card
+#| during system startup. The second factor mechanism would be of no use.
 #|
 #| C<BootSecurityLevel::<2FA>> can't be used with
 #| C<DiskEncryption::FILESYSTEM> and C<SecondFactor::MORT>, because
@@ -80,10 +83,10 @@ my \Utils = Star::System::Utils;
 #| =for item2
 #| With C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::ROOT> (or
 #| C<DmCryptTarget::BOTH>) and C<SecondFactor::MORT>: An external storage
-#| drive acts as the second factor. The boot partition is stored in the
-#| external storage drive either encrypted or unencrypted, depending. The
-#| root volume is encrypted and headerless, its header detached and stored
-#| in the boot partition as applicable.
+#| drive acts as the second factor. The C</boot> partition is stored in
+#| the external storage drive either encrypted or unencrypted, depending.
+#| The root volume is encrypted and headerless, its header detached and
+#| stored in the C</boot> partition as applicable.
 #|
 #| =for item2
 #| With C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::ROOT> (or
@@ -119,10 +122,10 @@ my \Utils = Star::System::Utils;
 #| =for item2
 #| With C<DiskEncryption::DMFS>, C<DmCryptTarget::ROOT> (or
 #| C<DmCryptTarget::BOTH>) and C<SecondFactor::MORT>: An external storage
-#| drive acts as the second factor. The boot partition is stored in the
-#| external storage drive either encrypted or unencrypted, depending. The
-#| root volume is encrypted and headerless, its header detached and stored
-#| in the boot partition as applicable.
+#| drive acts as the second factor. The C</boot> partition is stored in
+#| the external storage drive either encrypted or unencrypted, depending.
+#| The root volume is encrypted and headerless, its header detached and
+#| stored in the C</boot> partition as applicable.
 #|
 #| =for item2
 #| With C<DiskEncryption::DMFS>, C<DmCryptTarget::ROOT> (or
@@ -184,8 +187,8 @@ enum DeviceLocator is export <
 #| C<DMFS>: Enable disk encryption both via the dm-crypt kernel crypto
 #| API and the filesystem's native encryption implementation. Only
 #| available for C<Filesystem::EXT4> and C<Filesystem::F2FS>. May be used
-#| to encrypt boot partition via dm-crypt while encrypting root partition
-#| via the filesystem's native encryption implementation.
+#| to encrypt C</boot> partition via dm-crypt while encrypting C</>
+#| partition via the filesystem's native encryption implementation.
 enum DiskEncryption is export <
     NONE
     DM-CRYPT
@@ -215,12 +218,12 @@ enum DmCryptMode is export <
 #| be unencrypted.
 #|
 #| =for item
-#| C<BOOT>: Only encrypt the boot partition. The root partition will
+#| C<BOOT>: Only encrypt the C</boot> partition. The C</> partition will
 #| be unencrypted.
 #|
 #| =for item
-#| C<BOTH>: Encrypt both the root volume or partition in addition to
-#| C</boot>. C</boot> may or may not reside on a separate partition
+#| C<BOTH>: Encrypt both the root volume (or C</> partition) in addition
+#| to C</boot>. C</boot> may or may not reside on a separate partition
 #| (see: C<BootSecurityLevel>).
 #|
 #| N.B. C<BOOT> and C<BOTH> require selecting the GRUB bootloader.
@@ -341,39 +344,41 @@ enum RelocateBootTo is export <
 #| mechanisms for achieving C<BootSecurityLevel::<2FA>>.
 #|
 #| =for item
-#| C<FIDO2>: Decrypt root partition with FIDO2 device. Not necessarily a
+#| C<FIDO2>: Decrypt C</> partition with FIDO2 device. Not necessarily a
 #| true second factor mechanism unless combined with a dm-crypt encrypted
-#| boot partition. N<And even then, only if the term "2FA" is allowed to
-#| be satisfied in the broader context of system startup, as opposed to
+#| C</boot> partition. N<And even then, only if the term "2FA" is allowed
+#| to be satisfied in the broader context of system startup, as opposed to
 #| disk decryption itself. The limitation here is the fact the dm-crypt
-#| encrypted boot partition can only be decrypted with a password
-#| (something you know), while the root partition can only be decrypted
-#| with the FIDO2 device (something you have). Hence, neither the boot nor
-#| the root partition require I<both> something you have I<and> something
-#| you know to decrypt. Only C<SecondFactor::MORT> can stop an adversary
-#| from decrypting the boot and root partitions separately or together
-#| without possessing both something you know and something you have.>
+#| encrypted C</boot> partition can only be decrypted with a password
+#| (something you know), while the C</> partition can only be decrypted
+#| with the FIDO2 device (something you have). Hence, neither the C</boot>
+#| nor the C</> partition require I<both> something you have I<and>
+#| something you know to decrypt. Only C<SecondFactor::MORT> can stop an
+#| adversary from decrypting the C</boot> and C</> partitions separately
+#| or together without possessing both something you know and something
+#| you have.>
 #|
 #| =for item
-#| C<KEY>: Decrypt root partition with key file in external storage drive.
+#| C<KEY>: Decrypt C</> partition with key file in external storage drive.
 #| Not necessarily a true second factor mechanism unless combined with a
-#| dm-crypt encrypted boot partition. N<The caveat in the footnote of
+#| dm-crypt encrypted C</boot> partition. N<The caveat in the footnote of
 #| C<SecondFactor::FIDO2> applies to C<SecondFactor::KEY> - that is,
 #| unless the key file is encrypted. Encrypting the key file can stop an
-#| adversary from decrypting the root partition without possessing both
+#| adversary from decrypting the C</> partition without possessing both
 #| something you know and something you have, but it would remain possible
-#| for an adversary to decrypt the boot partition with only something you
-#| know.>
+#| for an adversary to decrypt the C</boot> partition with only something
+#| you know.>
 #|
 #| =for item
-#| C<MORT>: Decrypt dm-crypt encrypted root partition with detached header
-#| stored on boot partition in external storage drive.
+#| C<MORT>: Decrypt dm-crypt encrypted volume with detached header stored
+#| on C</boot> partition in external storage drive.
 #|
 #| =for item
-#| C<PKCS>: Decrypt root partition with PKCS#11-compatible security token
+#| C<PKCS>: Decrypt C</> partition with PKCS#11-compatible security token
 #| or smart card. Not necessarily a true second factor mechanism unless
-#| combined with a dm-crypt encrypted boot partition. N<The caveat in the
-#| footnote of C<SecondFactor::FIDO2> applies to C<SecondFactor::PKCS>.>
+#| combined with a dm-crypt encrypted C</boot> partition. N<The caveat in
+#| the footnote of C<SecondFactor::FIDO2> applies to
+#| C<SecondFactor::PKCS>.>
 enum SecondFactor is export <
     FIDO2
     KEY

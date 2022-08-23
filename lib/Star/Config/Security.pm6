@@ -481,9 +481,9 @@ class Star::Config::Security
         ).bless(:$dm-crypt, :$filesystem);
     }
 
-    # A separate boot partition is needed for C<DiskEncryption::DMFS> plus
-    # C<DmCryptTarget::ROOT>, but it won't be encrypted. Hence, we don't
-    # want C<Star::Config::Security::DmCrypt::Boot::Opts>.
+    # A separate C</boot> partition is needed for C<DiskEncryption::DMFS>
+    # plus C<DmCryptTarget::ROOT>, but it won't be encrypted. Hence, we
+    # don't want C<Star::Config::Security::DmCrypt::Boot::Opts>.
     multi method new(
         DiskEncryption::DMFS,
         DmCryptTarget::ROOT,

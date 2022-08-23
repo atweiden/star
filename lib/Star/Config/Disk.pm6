@@ -7,16 +7,16 @@ use Star::Types;
 
 my role RootAttributes
 {
-    #| C<$.device> is the target block device for the root filesystem.
+    #| C<$.device> is the target block device to mount C</> on.
     has Str:D $.device is required;
 
-    #| C<$.filesystem> contains settings for the root filesystem.
+    #| C<$.filesystem> contains filesystem settings for C</>.
     has Star::Config::Disk::Filesystem:D $.filesystem is required;
 }
 
 my role RootLvm
 {
-    #| C<$.lvm> contains LVM settings for the root filesystem.
+    #| C<$.lvm> contains LVM settings for C</>.
     has Star::Config::Disk::Lvm:D $.lvm is required;
 }
 
@@ -73,16 +73,15 @@ class Star::Config::Disk::Root
 
 my role BootAttributes
 {
-    #| C<$.filesystem> contains settings for the boot filesystem.
+    #| C<$.filesystem> contains filesystem settings for C</boot>.
     has Star::Config::Disk::Filesystem:D $.filesystem is required;
 }
 
 my role BootDevice
 {
-    #| C<$.device> is the target block device for the boot filesystem.
+    #| C<$.device> is the target block device for C</boot>.
     #|
-    #| N.B. This device must differ from the target block device for the
-    #| root partition.
+    #| N.B. This device must differ from the target block device for C</>.
     has Str:D $.device is required;
 }
 
@@ -98,7 +97,7 @@ class Star::Config::Disk::Boot
 
 # Useful whenever a separate boot device is needed. In which case, both
 # C<$.filesystem> and C<$.device> are required. The caller must ensure
-# boot's C<$.device> differs from root's.
+# C</boot>'s C<$.device> differs from C</>'s.
 role Star::Config::Disk::Boot::Opts[
     RelocateBootTo:D $location where RelocateBootTo::SEPARATE-DEVICE
 ]
@@ -116,8 +115,8 @@ role Star::Config::Disk::Boot::Opts[
     }
 }
 
-# Useful whenever a separate boot partition is needed on the root device.
-# In which case, C<$.filesystem> is required.
+# Useful whenever a separate partition for C</boot> is needed on the block
+# device for C</>. In which case, C<$.filesystem> is required.
 role Star::Config::Disk::Boot::Opts[
     RelocateBootTo:D $location where RelocateBootTo::SEPARATE-PARTITION
 ]
@@ -133,9 +132,9 @@ role Star::Config::Disk::Boot::Opts[
     }
 }
 
-# Useful if the root and boot filesystem formats differ, and LVM is
-# enabled. In which case, the boot filesystem is created on an LVM logical
-# volume, rather than on a separate partition.
+# Useful if filesystem formats for C</> and C</boot> differ, and LVM is
+# enabled. In which case, the C</boot> filesystem is created on an LVM
+# logical volume, rather than on a separate partition.
 role Star::Config::Disk::Boot::Opts[
     RelocateBootTo:D $location where RelocateBootTo::LVM-LOGICAL-VOLUME
 ]
@@ -172,18 +171,19 @@ my role DiskBoot
     has Star::Config::Disk::Boot:D $.boot is required;
 }
 
-#| C<Star::Config::Disk> stores settings for the root and boot partitions.
+#| C<Star::Config::Disk> stores settings for the C</> and C</boot>
+#| filesystems.
 #|
-#| A boot partition is only created if one of the following conditions is
-#| true:
+#| A separate filesystem for C</boot> is only created if one of the
+#| following conditions is true:
 #|
 #| =begin item
 #|
-#| The root and boot filesystem formats differ, and LVM is disabled. If
-#| the root and boot filesystem formats differ, and LVM is I<enabled>, the
-#| C</boot> filesystem is created on an LVM logical volume within the root
-#| partition - that is, unless another condition necessitating a separate
-#| boot partition is met.
+#| The C</> and C</boot> filesystem formats differ, and LVM is disabled.
+#| If the C</> and C</boot> filesystem formats differ, and LVM is
+#| I<enabled>, the C</boot> filesystem is created on an LVM logical volume
+#| within the C</> filesystem - that is, unless another condition
+#| necessitating a separate boot partition is met.
 #|
 #| =end item
 #|
@@ -199,7 +199,7 @@ my role DiskBoot
 #|
 #| =begin item
 #|
-#| dm-crypt encryption is used to encrypt the root partition only. This
+#| dm-crypt encryption is used to encrypt the C</> filesystem only. This
 #| entails having a separate boot partition.
 #|
 #|     DiskEncryption::DM-CRYPT && DmCryptTarget::ROOT
@@ -208,8 +208,8 @@ my role DiskBoot
 #|
 #| =begin item
 #|
-#| dm-crypt encryption is used to encrypt the boot partition only. This
-#| entails having a separate boot partition.
+#| dm-crypt encryption is used to encrypt the C</boot> filesystem only.
+#| This entails having a separate boot partition.
 #|
 #|     DiskEncryption::DM-CRYPT && DmCryptTarget::BOOT
 #|
@@ -217,10 +217,10 @@ my role DiskBoot
 #|
 #| =begin item
 #|
-#| dm-crypt encryption is used for encrypting the root and boot partitions
-#| together with C<BootSecurityLevel::<1FA>>. This entails storing the
-#| dm-crypt encrypted root volume's detached header in a separate boot
-#| partition.
+#| dm-crypt encryption is used for encrypting the C</> and C</boot>
+#| filesystems together with C<BootSecurityLevel::<1FA>>. This entails
+#| storing the dm-crypt encrypted root volume's detached header in a
+#| separate boot partition.
 #|
 #|     DiskEncryption::DM-CRYPT
 #|         && DmCryptTarget::BOTH
@@ -230,10 +230,10 @@ my role DiskBoot
 #|
 #| =begin item
 #|
-#| dm-crypt encryption is used for encrypting the root and boot partitions
-#| together with C<BootSecurityLevel::<2FA>> and C<SecondFactor::MORT>.
-#| This entails storing the dm-crypt encrypted root volume's detached
-#| header in a separate boot partition.
+#| dm-crypt encryption is used for encrypting both the C</> and C</boot>
+#| filesystems together with C<BootSecurityLevel::<2FA>> and
+#| C<SecondFactor::MORT>. This entails storing the dm-crypt encrypted root
+#| volume's detached header in a separate boot partition.
 #|
 #|     DiskEncryption::DM-CRYPT
 #|         && DmCryptTarget::BOTH
@@ -244,17 +244,17 @@ my role DiskBoot
 #|
 #| =begin item
 #|
-#| dm-crypt encryption is used for encrypting the root and boot partitions
-#| together with C<BootSecurityLevel::<2FA>> and C<SecondFactor::FIDO2>,
-#| C<SecondFactor::KEY> or C<SecondFactor::PKCS>. Since no bootloader at
-#| present is able to decrypt a dm-crypt encrypted boot partition using
-#| either FIDO2, an external key file, or PKCS#11-compatible security
-#| token or smart card during system startup, this entails having a
-#| separate boot partition. N<Arguably, a separate boot partition would be
-#| required regardless in order to achieve "2FA". Without the separate
-#| boot partition, the disk could be decrypted using solely the FIDO2
-#| device, external key file, or PKCS#11-compatible security token or
-#| smart card, respectively.>
+#| dm-crypt encryption is used for encrypting both the C</> and C</boot>
+#| filesystems together with C<BootSecurityLevel::<2FA>> and
+#| C<SecondFactor::FIDO2>, C<SecondFactor::KEY> or C<SecondFactor::PKCS>.
+#| Since no bootloader at present is able to decrypt a dm-crypt encrypted
+#| C</boot> partition using either FIDO2, an external key file, or
+#| PKCS#11-compatible security token or smart card during system startup,
+#| this entails having a separate boot partition. N<Arguably, a separate
+#| boot partition would be required regardless in order to achieve "2FA".
+#| Without the separate boot partition, the disk could be decrypted using
+#| solely the FIDO2 device, external key file, or PKCS#11-compatible
+#| security token or smart card, respectively.>
 #|
 #|     DiskEncryption::DM-CRYPT
 #|         && DmCryptTarget::BOTH
@@ -262,15 +262,13 @@ my role DiskBoot
 #|         && (SecondFactor::FIDO2 || SecondFactor::KEY || SecondFactor::PKCS)
 #|
 #| =end item
-#|
-#| Boot filesystem settings will only be available if one of the above
-#| conditions is met.
 class Star::Config::Disk
 {
-    # The root partition always exists.
+    # The C</> filesystem always exists.
     also does DiskRoot;
 
-    # The root and boot filesystem formats differ, and LVM is disabled.
+    # The C</> and C</boot> filesystem formats differ, and LVM is
+    # disabled.
     multi method new(
         Star::Config::Disk::Root::Opts[LvmOnRoot::NO] $r,
         Star::Config::Disk::Boot::Opts:D $b where {
@@ -299,8 +297,8 @@ class Star::Config::Disk
         self.^mixin(DiskBoot).bless(:$root, :$boot);
     }
 
-    # dm-crypt encryption is used to encrypt the root or boot partition
-    # only.
+    # dm-crypt encryption is used to encrypt either the C</> or C</boot>
+    # filesystem only.
     multi method new(
         Star::Config::Disk::Root::Opts:D $r,
         Star::Config::Disk::Boot::Opts:D $b,
@@ -315,8 +313,8 @@ class Star::Config::Disk
         self.^mixin(DiskBoot).bless(:$root, :$boot);
     }
 
-    # dm-crypt encryption is used for encrypting the root and boot
-    # partitions together with an elevated boot security level.
+    # dm-crypt encryption is used for encrypting the C</> and C</boot>
+    # filesystems together with an elevated boot security level.
     multi method new(
         Star::Config::Disk::Root::Opts:D $r,
         Star::Config::Disk::Boot::Opts:D $b,
