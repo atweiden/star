@@ -14,9 +14,9 @@ my \Utils = Star::System::Utils;
 #| C<BASE>: One or two encrypted partitions on single device - one for
 #| C</> and one for </boot>, or one shared partition for both C</> and
 #| C</boot>. When C</boot> is on a separate partition from C</>, its
-#| partition and/or C</>'s partition may be encrypted (see:
-#| C<DmCryptTarget>). When C</boot> is stored in the root partition,
-#| however, C</boot> is encrypted along with the rest of the system.
+#| partition and/or C</>'s may be encrypted (see: C<DmCryptTarget>). When
+#| C</boot> is stored in the same partition as C</>, however, C</boot> is
+#| encrypted along with the rest of the system.
 #|
 #| =begin item1
 #|
@@ -187,7 +187,7 @@ enum DeviceLocator is export <
 #| C<DMFS>: Enable disk encryption both via the dm-crypt kernel crypto
 #| API and the filesystem's native encryption implementation. Only
 #| available for C<Filesystem::EXT4> and C<Filesystem::F2FS>. May be used
-#| to encrypt C</boot> partition via dm-crypt while encrypting C</>
+#| to encrypt theC</boot> partition via dm-crypt while encrypting the C</>
 #| partition via the filesystem's native encryption implementation.
 enum DiskEncryption is export <
     NONE
@@ -214,8 +214,8 @@ enum DmCryptMode is export <
 #| targets for encryption via the dm-crypt kernel crypto API.
 #|
 #| =for item
-#| C<ROOT>: Only encrypt the root volume or partition. C</boot> will
-#| be unencrypted.
+#| C<ROOT>: Only encrypt the root volume or (or C</> partition). C</boot>
+#| will be unencrypted.
 #|
 #| =for item
 #| C<BOOT>: Only encrypt the C</boot> partition. The C</> partition will
@@ -361,10 +361,10 @@ enum RelocateBootTo is export <
 #| =for item
 #| C<KEY>: Decrypt C</> partition with key file in external storage drive.
 #| Not necessarily a true second factor mechanism unless combined with a
-#| dm-crypt encrypted C</boot> partition. N<The caveat in the footnote of
-#| C<SecondFactor::FIDO2> applies to C<SecondFactor::KEY> - that is,
-#| unless the key file is encrypted. Encrypting the key file can stop an
-#| adversary from decrypting the C</> partition without possessing both
+#| dm-crypt encrypted C</boot> partition. N<The caveat in the
+#| C<SecondFactor::FIDO2> footnote applies to C<SecondFactor::KEY> - that
+#| is, unless the key file is encrypted. Encrypting the key file can stop
+#| an adversary from decrypting the C</> partition without possessing both
 #| something you know and something you have, but it would remain possible
 #| for an adversary to decrypt the C</boot> partition with only something
 #| you know.>
@@ -377,8 +377,7 @@ enum RelocateBootTo is export <
 #| C<PKCS>: Decrypt C</> partition with PKCS#11-compatible security token
 #| or smart card. Not necessarily a true second factor mechanism unless
 #| combined with a dm-crypt encrypted C</boot> partition. N<The caveat in
-#| the footnote of C<SecondFactor::FIDO2> applies to
-#| C<SecondFactor::PKCS>.>
+#| the C<SecondFactor::FIDO2> footnote applies to C<SecondFactor::PKCS>.>
 enum SecondFactor is export <
     FIDO2
     KEY

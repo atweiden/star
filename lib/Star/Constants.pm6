@@ -9,12 +9,12 @@ unit module Star::Constants;
     #| Partition.
     constant $DIRECTORY-EFI = '/boot/efi';
 
-    #| C<$DIRECTORY-KEYMAPS> is the directory within which keymaps can
-    #| be found.
+    #| C<$DIRECTORY-KEYMAPS> is the directory within which keymaps can be
+    #| found.
     constant $DIRECTORY-KEYMAPS = '/usr/share/kbd/keymaps';
 
-    #| C<$DIRECTORY-LOCALES> is the directory within which locales can
-    #| be found.
+    #| C<$DIRECTORY-LOCALES> is the directory within which locales can be
+    #| found.
     constant $DIRECTORY-LOCALES = '/usr/share/i18n/locales';
 
     #| C<$DIRECTORY-TIME-ZONES> is the directory within which time zones
@@ -29,10 +29,8 @@ unit module Star::Constants;
     #| and detached headers are stored.
     constant $SECRET-PREFIX-VAULT = '/boot';
 
-    #| C<$SECRET-PREFIX-BOOTVAULT> is the directory in which Bootvault
-    #| key files are stored, for use with either C<DmCryptTarget::BOOT>,
-    #| C<DmCryptTarget::BOTH> plus C<BootSecurityLevel::<1FA>> or
-    #| C<BootSecurityLevel::<2FA>>, or C<DiskEncryption::FILESYSTEM>.
+    #| C<$SECRET-PREFIX-BOOTVAULT> is the directory in which Bootvault key
+    #| files are stored.
     constant $SECRET-PREFIX-BOOTVAULT = '/root';
 
 =head2 Constants for I<libcrypt>
@@ -72,10 +70,7 @@ unit module Star::Constants;
     #| C<$GDISK-SIZE-EFI> is the size of the EFI System Partition.
     constant $GDISK-SIZE-EFI = '550M';
 
-    #| C<$GDISK-SIZE-BOOT> is the size of the C</boot> partition, for
-    #| use with either C<DmCryptTarget::BOOT>, C<DmCryptTarget::BOTH>
-    #| plus C<BootSecurityLevel::<1FA>> or C<BootSecurityLevel::<2FA>>,
-    #| or C<DiskEncryption::FILESYSTEM>.
+    #| C<$GDISK-SIZE-BOOT> is the size of the C</boot> partition.
     constant $GDISK-SIZE-BOOT = '1024M';
 
     #| C<$GDISK-TYPECODE-BIOS> is the gdisk internal code for the BIOS

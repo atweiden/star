@@ -22,9 +22,9 @@ has UserName:D $.user-name-guest is required;
 has Str:D $.user-pass-hash-guest is required;
 
 #| C<$.user-name-sftp> is the name for the "SFTP user". The SFTP user
-#| account exists for the sole purpose of handling SFTP authentication
-#| and remote file transfer. This user is locked down and given very
-#| limited privileges.
+#| account is designed for the sole purpose of authenticating inbound SFTP
+#| connections. This user is locked down and given very limited
+#| privileges.
 has UserName:D $.user-name-sftp is required;
 
 #| C<$.user-pass-hash-sftp> is the SHA512 password hash for the SFTP user.
@@ -33,15 +33,16 @@ has Str:D $.user-pass-hash-sftp is required;
 #| C<$.user-pass-hash-root> is the SHA512 password hash for root.
 has Str:D $.user-pass-hash-root is required;
 
-#| C<$.user-name-grub> is the name for the "GRUB superuser". This isn't
-#| a real system user account. C<$.user-name-grub> is an arbitrary name
-#| used for the sole purpose of GRUB authentication. During system
-#| startup, after successful authentication, this "user" can edit GRUB
-#| menu entries or access the GRUB command console.
+#| C<$.user-name-grub> is the name for the "GRUB superuser". The GRUB
+#| superuser isn't a real user account. C<$.user-name-grub> is an
+#| arbitrary name to be entered along with an arbitrary password for GRUB
+#| authentication. Following successful authentication with GRUB, the GRUB
+#| superuser can edit GRUB menu entries or access the GRUB command
+#| console.
 has UserName:D $.user-name-grub is required;
 
-#| C<$.user-pass-hash-grub> is the PBKDF2 password hash for the "GRUB
-#| superuser".
+#| C<$.user-pass-hash-grub> is the PBKDF2 password hash for the GRUB
+#| superuser.
 has Str:D $.user-pass-hash-grub is required;
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
