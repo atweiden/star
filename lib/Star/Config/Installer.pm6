@@ -1,6 +1,6 @@
 use v6;
 use Star::Types;
-unit role Star::Config::Installer;
+unit class Star::Config::Installer;
 
 #| C<$.chroot-dir> contains the absolute path within which to perform
 #| installation.

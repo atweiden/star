@@ -1,6 +1,6 @@
 use v6;
 use Star::Types;
-unit role Star::Config::System;
+unit class Star::Config::System;
 
 #| C<$.drive-type> is the type of hard drive, e.g. SSD or HDD.
 has DriveType:D $.drive-type is required;

@@ -2,22 +2,22 @@ use v6;
 use Star::Types;
 
 # nyi
-role Star::Config::Distro[Distro:D :distro($)! where Distro::ALPINE]
+role Star::Config::Distro[Distro:D $ where Distro::ALPINE]
 {*}
 
 # nyi
-role Star::Config::Distro[Distro:D :distro($)! where Distro::ARCH]
+role Star::Config::Distro[Distro:D $ where Distro::ARCH]
 {*}
 
 # nyi
-role Star::Config::Distro[Distro:D :distro($)! where Distro::CHIMERA]
+role Star::Config::Distro[Distro:D $ where Distro::CHIMERA]
 {*}
 
 # nyi
-role Star::Config::Distro[Distro:D :distro($)! where Distro::GENTOO]
+role Star::Config::Distro[Distro:D $ where Distro::GENTOO]
 {*}
 
-role Star::Config::Distro[Distro:D :distro($)! where Distro::VOID]
+role Star::Config::Distro[Distro:D $ where Distro::VOID]
 {
     #| C<@.repository> stores locations of Void package repositories
     #| (prioritized).

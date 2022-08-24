@@ -1,6 +1,6 @@
 use v6;
 use Star::Types;
-unit role Star::Config::Account;
+unit class Star::Config::Account;
 
 #| C<$.user-name-admin> is the name for the system adminstrator's user
 #| account.
