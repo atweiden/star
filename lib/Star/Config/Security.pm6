@@ -99,7 +99,7 @@ my role DmCryptRootVolume[
     method mode(--> DmCryptMode:D) { $mode }
 }
 
-my role DmCryptRootVolumeHeader
+my role DmCryptRootVolumeHdr
 {
     #| C<$.header> is the path to the dm-crypt encrypted root volume
     #| detached header.
@@ -226,7 +226,7 @@ role Star::Config::Security::DmCrypt::Root::Opts[
         Star::Config::Security::DmCrypt::Root.^mixin(
             DmCryptRootVolume[$mode],
             # Detach dm-crypt encrypted root volume header.
-            DmCryptRootVolumeHeader
+            DmCryptRootVolumeHdr
         ).bless(|%opts);
     }
 }
