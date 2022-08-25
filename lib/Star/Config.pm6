@@ -26,6 +26,15 @@ method new(--> Star::Config:D)
     my Star::Config::Security:D $security = new-security();
     my Star::Config::Software:D $software = new-software();
     my Star::Config::System:D $system = new-system();
+    self.bless(
+        :$account,
+        :$disk,
+        :$distro,
+        :$installer,
+        :$security,
+        :$software,
+        :$system
+    );
 }
 
 sub new-account(--> Star::Config::Account:D)
