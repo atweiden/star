@@ -116,7 +116,6 @@ sub new-software(--> Star::Config::Software:D)
 
 sub new-system(--> Star::Config::System:D)
 {
-    my Distro:D $distro = Distro::VOID;
     my DriveType:D $drive-type = DriveType::SSD;
     my Graphics:D $graphics = Graphics::INTEGRATED;
     my Hostname:D $hostname = 'vault';
