@@ -27,6 +27,28 @@ clean() {
   fi
 }
 
+ensure_requirements() {
+  local executables_required
+  local executables_missing
+
+  executables_required=("curl" "gpg" "tar")
+  executables_missing=()
+
+  for executable in "${executables_required[@]}"; do
+    if ! [[ $(command -v "$executable") ]]; then
+      executables_missing+=("$executable")
+    fi
+  done
+
+  if [[ ${#executables_missing[@]} -gt 0 ]]; then
+    for executable in "${executables_missing[@]}"; do
+      printf "Sorry, %s couldn't be found. Please install, then try again.\n" \
+        "$executable"
+    done
+    exit 1
+  fi
+}
+
 prepare() {
   mkdir --parents "$RSRCDIR"
 }
@@ -59,6 +81,7 @@ extract() {
 }
 
 main() {
+  ensure_requirements
   clean
   prepare
   fetch
