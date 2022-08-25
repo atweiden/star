@@ -122,7 +122,7 @@ sub new-system(--> Star::Config::System:D)
     my Keymap:D $keymap = 'us';
     my Locale:D $locale = 'en_US';
     my Processor:D $processor = Processor::INTEL;
-    my TimeZone:D $time-zone = 'Antarctica/South_Pole';
+    my TimeZone:D $time-zone = 'America/Vancouver';
     my Bool:D $disable-ipv6  = False;
     my Bool:D $enable-classic-ifnames  = False;
     my Bool:D $enable-serial-console = False;
