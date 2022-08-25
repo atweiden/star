@@ -36,7 +36,7 @@ multi sub volume-group-name(
 }
 
 multi sub volume-group-name(
-    Str:D $volume-group-name where .so is copy,
+    Str:D $volume-group-name is copy where .so,
     UInt:D $tries-remaining = 100
     --> Str:D
 )
