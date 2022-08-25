@@ -1,5 +1,5 @@
 use v6;
-use Star::Config::Account
+use Star::Config::Account;
 use Star::Config::Disk;
 use Star::Config::Distro;
 use Star::Config::Installer;
