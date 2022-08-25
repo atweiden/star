@@ -378,7 +378,7 @@ class Star::Config::Security
 
     multi method new(
         DiskEncryption::NONE
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         self.bless;
@@ -392,7 +392,7 @@ class Star::Config::Security
         DmCryptTarget::BOTH,
         Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<1FA>] $r,
         Star::Config::Security::DmCrypt::Boot::Opts $b
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
@@ -405,7 +405,7 @@ class Star::Config::Security
         DmCryptTarget::BOTH,
         Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<2FA>] $r,
         Star::Config::Security::DmCrypt::Boot::Opts $b
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
@@ -417,7 +417,7 @@ class Star::Config::Security
         DiskEncryption::DM-CRYPT,
         DmCryptTarget::BOTH,
         Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::BASE] $r
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
@@ -429,7 +429,7 @@ class Star::Config::Security
         DiskEncryption::DM-CRYPT,
         DmCryptTarget::ROOT,
         Star::Config::Security::DmCrypt::Root::Opts:D $r
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
@@ -441,7 +441,7 @@ class Star::Config::Security
         DiskEncryption::DM-CRYPT,
         DmCryptTarget::BOOT,
         Star::Config::Security::DmCrypt::Boot::Opts:D $b
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
@@ -454,7 +454,7 @@ class Star::Config::Security
 
     multi method new(
         DiskEncryption::FILESYSTEM
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::Filesystem $filesystem .= new;
@@ -469,7 +469,7 @@ class Star::Config::Security
         DmCryptTarget::BOTH,
         Star::Config::Security::DmCrypt::Root::Opts:D $r,
         Star::Config::Security::DmCrypt::Boot::Opts:D $b
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
@@ -488,7 +488,7 @@ class Star::Config::Security
         DiskEncryption::DMFS,
         DmCryptTarget::ROOT,
         Star::Config::Security::DmCrypt::Root::Opts:D $r
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
@@ -505,7 +505,7 @@ class Star::Config::Security
         DiskEncryption::DMFS,
         DmCryptTarget::BOOT,
         Star::Config::Security::DmCrypt::Boot::Opts:D $b
-        --> Star::Config::Security::DmCrypt:D
+        --> Star::Config::Security:D
     )
     {
         my Star::Config::Security::DmCrypt $dm-crypt .=
