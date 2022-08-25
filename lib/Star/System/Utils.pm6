@@ -28,12 +28,14 @@ method ls-keymaps(--> Array[Str:D])
 #| representation.
 method ls-locales(--> Array[Str:D])
 {
-    state Str:D @locale = ls-locales($Star::Constants::DIRECTORY-LOCALES);
+    my Str:D $machine = self.uname(:machine);
+    my Str:D $locale-dir = musl-libc($machine)
+        ?? $Star::Constants::DIRECTORY-LOCALES-MUSL
+        !! $Star::Constants::DIRECTORY-LOCALES-GLIBC;
+    state Str:D @locale = ls-locales($locale-dir);
 }
 
 multi sub ls-locales(
-    # Avoid raising an exception on musl libc systems, where locales
-    # are always absent.
     Str:D $locale-dir where .IO.e.so && .IO.d.so
     --> Array[Str:D]
 )
@@ -46,7 +48,7 @@ multi sub ls-locales(
     --> Array[Str:D]
 )
 {
-    my Str:D @locale;
+    die(X::Star::System::Utils::LocaleDir.new(:$locale-dir));
 }
 
 #| C<ls-time-zones> returns a list of valid time zones, in C<Str>
@@ -69,7 +71,18 @@ method ls-time-zones(--> Array[Str:D])
     };
 }
 
+#| C<uname> returns the trimmed output of C<uname -m>.
+method uname(Bool:D :machine($)! where .so --> Str:D)
+{
+    my Str:D $machine = qx{uname --machine}.trim;
+}
+
 =head2 Helper functions
+
+#| C<musl-libc> returns C<True> if C<$machine> contains the characters
+#| "musl".
+multi sub musl-libc(Str:D $machine where /musl/ --> True) {*}
+multi sub musl-libc(Str:D $ --> False) {*}
 
 #| C<ls> returns an C<Array> of files in the directory at C<$path>,
 #| in C<Str> representation.

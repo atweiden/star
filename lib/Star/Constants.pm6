@@ -13,9 +13,13 @@ unit module Star::Constants;
     #| found.
     constant $DIRECTORY-KEYMAPS = '/usr/share/kbd/keymaps';
 
-    #| C<$DIRECTORY-LOCALES> is the directory within which locales can be
-    #| found.
-    constant $DIRECTORY-LOCALES = '/usr/share/i18n/locales';
+    #| C<$DIRECTORY-LOCALES-GLIBC> is the directory within which locales
+    #| can be found on glibc systems.
+    constant $DIRECTORY-LOCALES-GLIBC = '/usr/share/i18n/locales';
+
+    #| C<$DIRECTORY-LOCALES-MUSL> is the directory within which locales
+    #| can be found on musl libc systems.
+    constant $DIRECTORY-LOCALES-MUSL = %?RESOURCES{$DIRECTORY-LOCALES-GLIBC};
 
     #| C<$DIRECTORY-TIME-ZONES> is the directory within which time zones
     #| can be found.
