@@ -391,7 +391,7 @@ class Star::Config::Security
         DiskEncryption::DM-CRYPT,
         DmCryptTarget::BOTH,
         Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<1FA>] $r,
-        Star::Config::Security::DmCrypt::Boot::Opts[BootSecurityLevel::<1FA>] $b
+        Star::Config::Security::DmCrypt::Boot::Opts $b
         --> Star::Config::Security::DmCrypt:D
     )
     {
@@ -404,7 +404,7 @@ class Star::Config::Security
         DiskEncryption::DM-CRYPT,
         DmCryptTarget::BOTH,
         Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<2FA>] $r,
-        Star::Config::Security::DmCrypt::Boot::Opts[BootSecurityLevel::<2FA>] $b
+        Star::Config::Security::DmCrypt::Boot::Opts $b
         --> Star::Config::Security::DmCrypt:D
     )
     {
