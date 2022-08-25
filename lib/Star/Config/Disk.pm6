@@ -267,6 +267,12 @@ class Star::Config::Disk
     # The C</> filesystem always exists.
     also does DiskRoot;
 
+    # Prevent role C<DiskRoot>'s default implementation of method C<new>
+    # from impacting class C<Star::Config::Disk>'s ability to take unnamed
+    # arguments in I<its> method C<new>.
+    proto method new(|)
+    {*}
+
     # The C</> and C</boot> filesystem formats differ, and LVM is
     # disabled.
     multi method new(
@@ -280,7 +286,7 @@ class Star::Config::Disk
     {
         my Star::Config::Disk::Root $root .= new($r);
         my Star::Config::Disk::Boot $boot .= new($b);
-        self.bless(:$root, :$boot);
+        self.^mixin(DiskBoot).bless(:$root, :$boot);
     }
 
     # The filesystem's native encryption implementation is used.
