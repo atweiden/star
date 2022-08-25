@@ -29,11 +29,13 @@ method ls-keymaps(--> Array[Str:D])
 #| representation.
 method ls-locales(--> Array[Str:D])
 {
-    my Str:D $machine = self.uname(:machine);
-    my Str:D $locale-dir = musl-libc($machine)
-        ?? $Star::Constants::DIRECTORY-LOCALES-MUSL
-        !! $Star::Constants::DIRECTORY-LOCALES-GLIBC;
-    state Str:D @locale = ls-locales($locale-dir);
+    state Str:D @locale = do {
+        my Str:D $machine = self.uname(:machine);
+        my Str:D $locale-dir = musl-libc($machine)
+            ?? $Star::Constants::DIRECTORY-LOCALES-MUSL
+            !! $Star::Constants::DIRECTORY-LOCALES-GLIBC;
+        ls-locales($locale-dir);
+    };
 }
 
 multi sub ls-locales(
