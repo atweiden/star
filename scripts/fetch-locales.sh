@@ -22,7 +22,7 @@ readonly BASENAME="$PKGNAME-$VERSION-$RELEASE-$ARCH.pkg.tar.zst"
 readonly FILE="$SOURCES/$BASENAME"
 
 clean() {
-  if [[ -d "$LOCALES" ]]; then
+  if [[ -d "$DATADIR" ]]; then
     rm --recursive --force "$DATADIR"
   fi
 }
