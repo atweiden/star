@@ -264,9 +264,6 @@ my role DiskBoot
 #| =end item
 class Star::Config::Disk
 {
-    # The C</> filesystem always exists.
-    also does DiskRoot;
-
     # The C</> and C</boot> filesystem formats differ, and LVM is
     # disabled.
     multi method new(
@@ -280,7 +277,7 @@ class Star::Config::Disk
     {
         my Star::Config::Disk::Root $root .= new($r);
         my Star::Config::Disk::Boot $boot .= new($b);
-        self.bless(:$root, :$boot);
+        self.^mixin(DiskRoot, DiskBoot).bless(:$root, :$boot);
     }
 
     # The filesystem's native encryption implementation is used.
@@ -294,7 +291,7 @@ class Star::Config::Disk
     {
         my Star::Config::Disk::Root $root .= new($r);
         my Star::Config::Disk::Boot $boot .= new($b);
-        self.^mixin(DiskBoot).bless(:$root, :$boot);
+        self.^mixin(DiskRoot, DiskBoot).bless(:$root, :$boot);
     }
 
     # dm-crypt encryption is used to encrypt either the C</> or C</boot>
@@ -310,7 +307,7 @@ class Star::Config::Disk
     {
         my Star::Config::Disk::Root $root .= new($r);
         my Star::Config::Disk::Boot $boot .= new($b);
-        self.^mixin(DiskBoot).bless(:$root, :$boot);
+        self.^mixin(DiskRoot, DiskBoot).bless(:$root, :$boot);
     }
 
     # dm-crypt encryption is used for encrypting the C</> and C</boot>
@@ -327,7 +324,7 @@ class Star::Config::Disk
     {
         my Star::Config::Disk::Root $root .= new($r);
         my Star::Config::Disk::Boot $boot .= new($b);
-        self.^mixin(DiskBoot).bless(:$root, :$boot);
+        self.^mixin(DiskRoot, DiskBoot).bless(:$root, :$boot);
     }
 
     multi method new(
@@ -339,7 +336,7 @@ class Star::Config::Disk
     )
     {
         my Star::Config::Disk::Root $root .= new($r);
-        self.bless(:$root);
+        self.^mixin(DiskRoot).bless(:$root);
     }
 
     multi method new(
@@ -350,7 +347,7 @@ class Star::Config::Disk
     )
     {
         my Star::Config::Disk::Root $root .= new($r);
-        self.bless(:$root);
+        self.^mixin(DiskRoot).bless(:$root);
     }
 }
 
