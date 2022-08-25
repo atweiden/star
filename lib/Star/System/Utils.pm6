@@ -21,7 +21,7 @@ method ls-keymaps(--> Array[Str:D])
             # Filter out the C</usr/share/kbd/keymaps/include> directory.
             ls($DIRECTORY-KEYMAPS).grep(none "$DIRECTORY-KEYMAPS/include");
         ls-r(@path)
-            .grep(/'.map.gz'$/);
+            .grep(/'.map.gz'$/)
             .map({ .split('/').tail.split('.').first })
             .sort;
     };
