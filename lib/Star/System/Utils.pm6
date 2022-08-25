@@ -11,14 +11,15 @@ unit class Star::System::Utils;
 #| representation.
 method ls-keymaps(--> Array[Str:D])
 {
+    my constant $DIRECTORY-KEYMAPS = $Star::Constants::DIRECTORY-KEYMAPS;
+
     # Equivalent to C<localectl list-keymaps --no-pager>.
     #
     # See: C<src/basic/def.h> in I<systemd> source code
     state Str:D @keymap = do {
         my Str:D @path =
             # Filter out the C</usr/share/kbd/keymaps/include> directory.
-            ls($Star::Constants::DIRECTORY-KEYMAPS)
-                .grep(none "$Star::Constants::DIRECTORY-KEYMAPS/include");
+            ls($DIRECTORY-KEYMAPS).grep(none "$DIRECTORY-KEYMAPS/include");
         ls-r(@path)
             .grep(/'.map.gz'$/);
             .map({ .split('/').tail.split('.').first })
