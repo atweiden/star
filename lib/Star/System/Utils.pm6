@@ -82,8 +82,7 @@ method uname(Bool:D :machine($)! where .so --> Str:D)
 
 =head2 Helper functions
 
-#| C<musl-libc> returns C<True> if C<$machine> contains the characters
-#| "musl".
+#| C<musl-libc> returns C<True> if C<$machine> contains the string "musl".
 multi sub musl-libc(Str:D $machine where /musl/ --> True) {*}
 multi sub musl-libc(Str:D $ --> False) {*}
 
