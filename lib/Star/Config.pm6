@@ -126,7 +126,18 @@ sub new-system(--> Star::Config::System:D)
     my Bool:D $disable-ipv6  = False;
     my Bool:D $enable-classic-ifnames  = False;
     my Bool:D $enable-serial-console = False;
-    Star::Config::Software[$distro].new(:$kernel, :@package);
+    Star::Config::System.new(
+        $drive-type,
+        $graphics,
+        $hostname,
+        $keymap,
+        $locale,
+        $processor,
+        $time-zone,
+        $disable-ipv6,
+        $enable-classic-ifnames,
+        $enable-serial-console
+    );
 }
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
