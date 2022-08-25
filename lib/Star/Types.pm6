@@ -286,11 +286,11 @@ enum Filesystem is export <
 #| C<Graphics> is an enum whose variants represent the different types
 #| of graphics cards.
 #|
-#| =item C<INTEL>: Intel or integrated graphics card
+#| =item C<INTEGRATED>: Intel or integrated graphics card
 #| =item C<NVIDIA>: NVIDIA dedicated/switchable graphics card
 #| =item C<RADEON>: AMD/ATI Radeon dedicated/switchable graphics card
 enum Graphics is export <
-    INTEL
+    INTEGRATED
     NVIDIA
     RADEON
 >;

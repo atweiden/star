@@ -117,7 +117,7 @@ sub new-software(--> Star::Config::Software:D)
 sub new-system(--> Star::Config::System:D)
 {
     my DriveType:D $drive-type = DriveType::SSD;
-    my Graphics:D $graphics = Graphics::INTEL;
+    my Graphics:D $graphics = Graphics::INTEGRATED;
     my Hostname:D $hostname = 'vault';
     my Keymap:D $keymap = 'us';
     my Locale:D $locale = 'en_US';
