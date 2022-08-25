@@ -400,14 +400,14 @@ my grammar TypesSubsetsGrammar
 {
     #| C<alnum-lower> matches a single lowercase alphanumeric character,
     #| or an underscore.
-    my token alnum-lower
+    token alnum-lower
     {
         <+alpha-lower +digit>
     }
 
     #| C<alpha-lower> matches a single lowercase alphabetic character,
     #| or an underscore.
-    my token alpha-lower
+    token alpha-lower
     {
         <+lower +[_]>
     }
