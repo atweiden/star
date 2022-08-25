@@ -597,13 +597,13 @@ subset UserName of Str is export where
 
 =head2 Helper functions
 
-multi sub is-keymap(Str:D $ where Utils.ls-keymaps.grep($_) --> True) {*}
+multi sub is-keymap(Str:D $ where { Utils.ls-keymaps.grep($_) } --> True) {*}
 multi sub is-keymap(Str $ --> False) {*}
 
-multi sub is-locale(Str:D $ where Utils.ls-locales.grep($_) --> True) {*}
+multi sub is-locale(Str:D $ where { Utils.ls-locales.grep($_) } --> True) {*}
 multi sub is-locale(Str $ --> False) {*}
 
-multi sub is-time-zone(Str:D $ where Utils.ls-time-zones.grep($_) --> True) {*}
+multi sub is-time-zone(Str:D $ where { Utils.ls-time-zones.grep($_) } --> True) {*}
 multi sub is-time-zone(Str $ --> False) {*}
 
 multi sub rootpart(IO:D $path where .parent eq '/'.IO --> IO:D) { $path }
