@@ -1,5 +1,6 @@
 use v6;
 use Star::Constants;
+use X::Star::System::Utils;
 
 #| C<Star::System::Utils> is a class whose methods are designed for
 #| cross-distro, untyped interactions with third-party software pertaining
