@@ -517,10 +517,19 @@ subset AbsolutePath of Str is export where .defined && .IO.is-absolute.so;
 #| C<RelativePath> is a relative path in C<Str> representation.
 subset RelativePath of Str is export where .defined && .IO.is-relative.so;
 
-#| C<DeviceName> is a valid device mapper name for encrypted volumes.
-subset DeviceName of Str is export where
+#| C<VaultSecretPrefix> is an absolute path (in C<Str> representation)
+#| inside The Vault secret prefix where Vault secret material can reside.
+subset VaultSecretPrefix of AbsolutePath is export where
 {
-    TypesSubsetsGrammar.parse($_, :rule<device-name>);
+    rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-VAULT.IO;
+}
+
+#| C<BootvaultSecretPrefix> is an absolute path (in C<Str> representation)
+#| inside The Bootvault secret prefix where Bootvault secret material can
+#| reside.
+subset BootvaultSecretPrefix of AbsolutePath is export where
+{
+    rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-BOOTVAULT.IO;
 }
 
 #| C<DmCryptVolumePassword> is a valid password for dm-crypt encrypted
@@ -542,6 +551,12 @@ subset DmCryptRootVolumeKeyFile of VaultSecretPrefix is export;
 #| It exists to ensure the dm-crypt encrypted boot volume key file resides
 #| within The Bootvault secret prefix.
 subset DmCryptBootVolumeKeyFile of BootvaultSecretPrefix is export;
+
+#| C<DeviceName> is a valid device mapper name for encrypted volumes.
+subset DeviceName of Str is export where
+{
+    TypesSubsetsGrammar.parse($_, :rule<device-name>);
+}
 
 #| C<Hostname> is a valid hostname for identification on a network.
 subset Hostname of Str is export where
@@ -578,21 +593,6 @@ subset TimeZone of Str is export where
 subset UserName of Str is export where
 {
     TypesSubsetsGrammar.parse($_, :rule<user-name>);
-}
-
-#| C<VaultSecretPrefix> is an absolute path (in C<Str> representation)
-#| inside The Vault secret prefix where Vault secret material can reside.
-subset VaultSecretPrefix of AbsolutePath is export where
-{
-    rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-VAULT.IO;
-}
-
-#| C<BootvaultSecretPrefix> is an absolute path (in C<Str> representation)
-#| inside The Bootvault secret prefix where Bootvault secret material can
-#| reside.
-subset BootvaultSecretPrefix of AbsolutePath is export where
-{
-    rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-BOOTVAULT.IO;
 }
 
 =head2 Helper functions
