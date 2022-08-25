@@ -17,7 +17,8 @@ method ls-keymaps(--> Array[Str:D])
     state Str:D @keymap = do {
         my Str:D @path =
             # Filter out the C</usr/share/kbd/keymaps/include> directory.
-            ls($Star::Constants::DIRECTORY-KEYMAPS).grep(none 'include');
+            ls($Star::Constants::DIRECTORY-KEYMAPS)
+                .grep(none "$Star::Constants::DIRECTORY-KEYMAPS/include");
         ls-r(@path)
             .grep(/'.map.gz'$/);
             .map({ .split('/').tail.split('.').first })
