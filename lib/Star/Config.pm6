@@ -94,13 +94,13 @@ sub new-security(--> Star::Config::Security:D)
         my Str:D $iter-time = 'iter-time';
         my Str:D $key-size = 'key-size';
         Star::Config::Security::DmCrypt::Root::Opts[$boot-security-level].new(
-            $mode,
-            $name,
-            $key-file,
-            $cipher,
-            $hash,
-            $iter-time,
-            $key-size
+            :$mode,
+            :$name,
+            :$key-file,
+            :$cipher,
+            :$hash,
+            :$iter-time,
+            :$key-size
         );
     };
     Star::Config::Security.new($disk-encryption, $dm-crypt-target, $r);
@@ -127,16 +127,16 @@ sub new-system(--> Star::Config::System:D)
     my Bool:D $enable-classic-ifnames  = False;
     my Bool:D $enable-serial-console = False;
     Star::Config::System.new(
-        $drive-type,
-        $graphics,
-        $hostname,
-        $keymap,
-        $locale,
-        $processor,
-        $time-zone,
-        $disable-ipv6,
-        $enable-classic-ifnames,
-        $enable-serial-console
+        :$drive-type,
+        :$graphics,
+        :$hostname,
+        :$keymap,
+        :$locale,
+        :$processor,
+        :$time-zone,
+        :$disable-ipv6,
+        :$enable-classic-ifnames,
+        :$enable-serial-console
     );
 }
 
