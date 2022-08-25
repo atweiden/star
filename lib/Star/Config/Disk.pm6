@@ -293,7 +293,7 @@ class Star::Config::Disk
     multi method new(
         Star::Config::Disk::Root::Opts:D $r,
         Star::Config::Disk::Boot::Opts:D $b,
-        DiskEncryption:D $ where filesystem-encryption($_),
+        DiskEncryption:D $ where { filesystem-encryption($_) },
         *@
         --> Star::Config::Disk:D
     )
@@ -309,7 +309,7 @@ class Star::Config::Disk
         Star::Config::Disk::Root::Opts:D $r,
         Star::Config::Disk::Boot::Opts:D $b,
         DiskEncryption::DM-CRYPT,
-        DmCryptTarget:D $ where dm-crypt-target-root-or-boot($_),
+        DmCryptTarget:D $ where { dm-crypt-target-root-or-boot($_) },
         *@
         --> Star::Config::Disk:D
     )
@@ -326,7 +326,7 @@ class Star::Config::Disk
         Star::Config::Disk::Boot::Opts:D $b,
         DiskEncryption::DM-CRYPT,
         DmCryptTarget::BOTH,
-        BootSecurityLevel:D $ where elevated-bootsec($_),
+        BootSecurityLevel:D $ where { elevated-bootsec($_) },
         *@
         --> Star::Config::Disk:D
     )
