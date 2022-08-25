@@ -1,2 +1,1 @@
-resources/usr/share
-*.pkg.*
+.precomp

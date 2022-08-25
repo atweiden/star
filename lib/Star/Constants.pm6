@@ -5,6 +5,17 @@ unit module Star::Constants;
 
 =head2 Constants for installer
 
+    #| C<$DIRECTORY-XDG-DATA> is equivalent to C<$XDG_DATA_HOME> from the
+    #| L<XDG Base Directory Specification|https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html>
+    #| - "the base directory relative to which user-specific data files
+    #| should be stored".
+    my constant $DIRECTORY-XDG-DATA =
+        $*ENV<XDG_DATA_HOME> // "$*HOME/.local/share";
+
+    #| C<$DIRECTORY-STAR-DATA> is the directory in which Star persists
+    #| data between runs.
+    constant $DIRECTORY-STAR-DATA = "$DIRECTORY-XDG-DATA/star";
+
     #| C<$DIRECTORY-EFI> is the mounting point of the EFI System
     #| Partition.
     constant $DIRECTORY-EFI = '/boot/efi';
@@ -19,7 +30,7 @@ unit module Star::Constants;
 
     #| C<$DIRECTORY-LOCALES-MUSL> is the directory within which locales
     #| can be found on musl libc systems.
-    constant $DIRECTORY-LOCALES-MUSL = %?RESOURCES{$DIRECTORY-LOCALES-GLIBC};
+    constant $DIRECTORY-LOCALES-MUSL = "$DIRECTORY-STAR-DATA/locales";
 
     #| C<$DIRECTORY-TIME-ZONES> is the directory within which time zones
     #| can be found.

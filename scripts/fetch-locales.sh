@@ -8,22 +8,22 @@
 
 set -eu
 
-# shellcheck disable=SC2155
-readonly STARDIR="$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")"
-readonly RSRCDIR="$STARDIR/resources"
+readonly DATADIR="${XDG_DATA_DIR:-$HOME/.local/share}/star"
+readonly LOCALES="$DATADIR/locales"
+readonly SOURCES="$DATADIR/sources"
 readonly PKGNAME="glibc"
 readonly VERSION=2.36
 readonly RELEASE=3
 readonly ARCH="x86_64"
 # see: https://archlinux.org/mirrorlist
 readonly MIRROR="https://mirror.aarnet.edu.au/pub/archlinux"
-readonly REPOSITORY="core"
-readonly FILE="$PKGNAME-$VERSION-$RELEASE-$ARCH.pkg.tar.zst"
+readonly REPO="core"
+readonly BASENAME="$PKGNAME-$VERSION-$RELEASE-$ARCH.pkg.tar.zst"
+readonly FILE="$SOURCES/$BASENAME"
 
 clean() {
-  rm --force "$STARDIR/$FILE"{,.sig}
-  if [[ -d "$RSRCDIR" ]]; then
-    rm --recursive --force "$RSRCDIR"
+  if [[ -d "$LOCALES" ]]; then
+    rm --recursive --force "$DATADIR"
   fi
 }
 
@@ -50,16 +50,17 @@ ensure_requirements() {
 }
 
 prepare() {
-  mkdir --parents "$RSRCDIR"
+  mkdir --parents "$LOCALES"
+  mkdir --parents "$SOURCES"
 }
 
 # fetch arch glibc package
 fetch() {
   curl \
-    --output-dir "$STARDIR" \
+    --output-dir "$SOURCES" \
     --progress-bar \
     --remote-name-all \
-    "$MIRROR/$REPOSITORY/os/$ARCH/$FILE"{,.sig}
+    "$MIRROR/$REPO/os/$ARCH/$BASENAME"{,.sig}
 }
 
 # check arch glibc package signature
@@ -76,7 +77,8 @@ extract() {
     --zstd \
     --extract \
     --file="$FILE" \
-    --directory="$RSRCDIR" \
+    --directory="$LOCALES" \
+    --strip-components=4 \
     usr/share/i18n/locales
 }
 
