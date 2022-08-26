@@ -31,7 +31,7 @@ class Star::Config::Disk::Root
 {...}
 
 # Disable LVM.
-role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::NO]
+role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::DISABLED]
 {
     also does RootAttributes;
     also does Star::Config::Roles::GetOpts;
@@ -45,7 +45,7 @@ role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::NO]
 }
 
 # Enable LVM. Use only with LVM-compatible C<Filesystem>s.
-role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::YES]
+role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::ENABLED]
 {
     also does RootAttributes;
     also does RootLvm;
@@ -276,7 +276,7 @@ class Star::Config::Disk
     # The C</> and C</boot> filesystem formats differ, and LVM is
     # disabled.
     multi method new(
-        Star::Config::Disk::Root::Opts[LvmOnRoot::NO] $r,
+        Star::Config::Disk::Root::Opts[LvmOnRoot::DISABLED] $r,
         Star::Config::Disk::Boot::Opts:D $b where {
             .filesystem.format != $r.filesystem.format
         },

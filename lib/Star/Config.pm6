@@ -66,7 +66,7 @@ sub new-disk(--> Star::Config::Disk:D)
     my Star::Config::Disk::Root::Opts:D $r = do {
         my Str:D $device = '/dev/sda';
         my Star::Config::Disk::Filesystem $filesystem .= new(Filesystem::BTRFS);
-        my LvmOnRoot:D $lvm-on = LvmOnRoot::NO;
+        my LvmOnRoot:D $lvm-on = LvmOnRoot::DISABLED;
         Star::Config::Disk::Root::Opts[$lvm-on].new(:$device, :$filesystem);
     };
     my DiskEncryption:D $disk-encryption = DiskEncryption::DM-CRYPT;

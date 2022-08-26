@@ -311,11 +311,11 @@ enum Libc is export <
 #| Exists as a workaround for limitations of C<Bool> in parameterized role
 #| signatures.
 #|
-#| =item C<NO>: Disable LVM on root device
-#| =item C<YES>: Enable LVM on root device
+#| =item C<DISABLED>: Disable LVM on root device
+#| =item C<ENABLED>: Enable LVM on root device
 enum LvmOnRoot is export <
-    NO
-    YES
+    DISABLED
+    ENABLED
 >;
 
 #| C<Processor> is an enum whose variants represent the different types
