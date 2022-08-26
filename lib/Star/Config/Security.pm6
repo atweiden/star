@@ -29,7 +29,7 @@ my role DmCryptRootVolumeAttributes
     #| encrypted root volume password twice during system startup.
     #|
     #| N.B. The path must be inside of C</boot> (The Vault secret prefix).
-    has DmCryptRootVolumeKeyFile:D $.key-file is required;
+    has DmCryptRootVolumeKeyFilePath:D $.key-file is required;
 
     #| C<$.cipher> contains the cipher specification for the dm-crypt
     #| encrypted root volume.
@@ -99,13 +99,13 @@ my role DmCryptRootVolume[
     method mode(--> DmCryptMode:D) { $mode }
 }
 
-my role DmCryptRootVolumeHdr
+my role DmCryptRootVolumeHeader
 {
     #| C<$.header> is the path to the dm-crypt encrypted root volume
     #| detached header.
     #|
     #| N.B. The path must be inside of C</boot> (The Vault secret prefix).
-    has DmCryptRootVolumeHeader:D $.header is required;
+    has DmCryptRootVolumeHeaderPath:D $.header is required;
 }
 
 my role DmCryptBootVolumeAttributes
@@ -134,7 +134,7 @@ my role DmCryptBootVolumeAttributes
     #|
     #| N.B. The path must be inside of C</root> (The Bootvault secret
     #| prefix).
-    has DmCryptBootVolumeKeyFile:D $.key-file is required;
+    has DmCryptBootVolumeKeyFilePath:D $.key-file is required;
 
     #| C<$.cipher> contains the cipher specification for the dm-crypt
     #| encrypted boot volume.
@@ -214,7 +214,7 @@ role Star::Config::Security::DmCrypt::Root::Opts[
 
     #| C<header> attribute required for C<BootSecurityLevel::<1FA>> and
     #| C<BootSecurityLevel::<2FA>>.
-    has DmCryptRootVolumeHeader:D $.header is required;
+    has DmCryptRootVolumeHeaderPath:D $.header is required;
 
     method Star::Config::Security::DmCrypt::Root(
         ::?CLASS:D:
@@ -226,7 +226,7 @@ role Star::Config::Security::DmCrypt::Root::Opts[
         Star::Config::Security::DmCrypt::Root.^mixin(
             DmCryptRootVolume[$mode],
             # Detach dm-crypt encrypted root volume header.
-            DmCryptRootVolumeHdr
+            DmCryptRootVolumeHeader
         ).bless(|%opts);
     }
 }

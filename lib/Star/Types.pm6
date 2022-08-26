@@ -536,21 +536,22 @@ subset BootvaultSecretPrefix of AbsolutePath is export where
 #| volumes. Password length must be between 1-512 characters.
 subset DmCryptVolumePassword of Str is export where { 0 < .chars <= 512 };
 
-#| C<DmCryptRootVolumeHeader> is a type alias to C<VaultSecretPrefix>.
+#| C<DmCryptRootVolumeHeaderPath> is a type alias to C<VaultSecretPrefix>.
 #| It exists to ensure the dm-crypt encrypted root volume detached header
 #| resides within The Vault secret prefix.
-subset DmCryptRootVolumeHeader of VaultSecretPrefix is export;
+subset DmCryptRootVolumeHeaderPath of VaultSecretPrefix is export;
 
-#| C<DmCryptRootVolumeKeyFile> is a type alias to C<VaultSecretPrefix>. It
-#| exists to ensure the dm-crypt encrypted root volume key file - for
-#| double password entry avoidance on system startup - resides within
-#| The Vault secret prefix.
-subset DmCryptRootVolumeKeyFile of VaultSecretPrefix is export;
+#| C<DmCryptRootVolumeKeyFilePath> is a type alias to
+#| C<VaultSecretPrefix>. It exists to ensure the dm-crypt encrypted root
+#| volume key file - for double password entry avoidance on system
+#| startup - resides within The Vault secret prefix.
+subset DmCryptRootVolumeKeyFilePath of VaultSecretPrefix is export;
 
-#| C<DmCryptBootVolumeKeyFile> is a type alias to C<BootvaultSecretPrefix>.
-#| It exists to ensure the dm-crypt encrypted boot volume key file resides
-#| within The Bootvault secret prefix.
-subset DmCryptBootVolumeKeyFile of BootvaultSecretPrefix is export;
+#| C<DmCryptBootVolumeKeyFilePath> is a type alias to
+#| C<BootvaultSecretPrefix>. It exists to ensure the dm-crypt
+#| encrypted boot volume key file resides within The Bootvault
+#| secret prefix.
+subset DmCryptBootVolumeKeyFilePath of BootvaultSecretPrefix is export;
 
 #| C<DeviceName> is a valid device mapper name for encrypted volumes.
 subset DeviceName of Str is export where

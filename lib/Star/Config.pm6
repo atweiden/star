@@ -97,7 +97,7 @@ sub new-security(--> Star::Config::Security:D)
         my BootSecurityLevel:D $boot-security-level = BootSecurityLevel::BASE;
         my DmCryptMode:D $mode = DmCryptMode::LUKS1;
         my DeviceName:D $name = 'vault';
-        my DmCryptRootVolumeKeyFile:D $key-file = '/boot/keys/root.key';
+        my DmCryptRootVolumeKeyFilePath:D $key-file = '/boot/keys/root.key';
         my Str:D $cipher = 'cipher';
         my Str:D $hash = 'hash';
         my Str:D $iter-time = 'iter-time';
