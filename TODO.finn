@@ -26,6 +26,17 @@ development
 - rename `Timezone $.timezone` -> `TimeZone $.time-zone`
 - rename `VaultType $.vault-type` -> `DmCryptMode ...`
 - handle new enum `Star::Types::{DriveType, Graphics, Libc, Processor, VaultType}`
+- add error handling code
+  - in `lib/Star/Config/Disk.pm6`
+    - the `Star::Config::Disk.new` multi method
+  - in `lib/Star/Config/Security.pm6`
+    - the `Star::Config::Security::DmCrypt.new` multi method
+    - the `Star::Config::Security.new` multi method
+- remove stack trace from `Exception`s
+  - `X::Star::Config::Disk::Lvm::VolumeGroupName`
+    - unable to find valid lvm volume group name in /dev
+  - `X::Star::System::Utils::LocaleDir`
+    - unable to find locales on musl: run provided script
 
 documentation
 -------------
