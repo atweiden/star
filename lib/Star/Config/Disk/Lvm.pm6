@@ -3,11 +3,17 @@ use Star::Config::Constants;
 use X::Star::Config::Disk;
 unit class Star::Config::Disk::Lvm;
 
+my constant $VOLUME-GROUP-NAME =
+    $Star::Config::Constants::VOLUME-GROUP-NAME;
+
+my constant $VOLUME-GROUP-NAME-RETRY-ATTEMPTS =
+    $Star::Config::Constants::VOLUME-GROUP-NAME-RETRY-ATTEMPTS;
+
 #| C<$.volume-group-name> is the name for the LVM volume group.
 has Str:D $.volume-group-name is required;
 
 method new(
-    Str:D :$volume-group-name = $Star::Config::Constants::VOLUME-GROUP-NAME
+    Str:D :$volume-group-name = $VOLUME-GROUP-NAME
     --> Star::Config::Disk::Lvm:D
 )
 {
@@ -37,7 +43,7 @@ multi sub volume-group-name(
 
 multi sub volume-group-name(
     Str:D $volume-group-name is copy where .so,
-    UInt:D $tries-remaining = 100
+    UInt:D $tries-remaining = $VOLUME-GROUP-NAME-RETRY-ATTEMPTS
     --> Str:D
 )
 {
