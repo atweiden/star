@@ -328,7 +328,7 @@ enum Processor is export <
     INTEL
 >;
 
-#| CRelocateBootTo> is an enum whose variants represent where to relocate
+#| C<RelocateBootTo> is an enum whose variants represent where to relocate
 #| C</boot> to.
 #|
 #| =item C<LVM-LOGICAL-VOLUME>: Relocate C</boot> to LVM logical volume
