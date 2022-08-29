@@ -29,6 +29,9 @@ development
 - add error handling code
   - in `lib/Star/Config/Disk.pm6`
     - the `Star::Config::Disk.new` multi method
+  - in `lib/Star/Config/Disk/Lvm.pm6`
+    - in nyi `TWEAK` submethod
+      - in combination with nyi config instantiation logic
   - in `lib/Star/Config/Security.pm6`
     - the `Star::Config::Security::DmCrypt.new` multi method
     - the `Star::Config::Security.new` multi method
