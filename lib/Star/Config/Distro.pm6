@@ -1,24 +1,35 @@
 use v6;
 use Star::Types;
 
-# nyi
+my role Variant[Distro:D $distro]
+{
+    method variant(--> Distro:D) { $distro }
+}
+
 role Star::Config::Distro[Distro:D $ where Distro::ALPINE]
-{*}
+{
+    also does Variant[Distro::ALPINE];
+}
 
-# nyi
 role Star::Config::Distro[Distro:D $ where Distro::ARCH]
-{*}
+{
+    also does Variant[Distro::ARCH];
+}
 
-# nyi
 role Star::Config::Distro[Distro:D $ where Distro::CHIMERA]
-{*}
+{
+    also does Variant[Distro::CHIMERA];
+}
 
-# nyi
 role Star::Config::Distro[Distro:D $ where Distro::GENTOO]
-{*}
+{
+    also does Variant[Distro::GENTOO];
+}
 
 role Star::Config::Distro[Distro:D $ where Distro::VOID]
 {
+    also does Variant[Distro::VOID];
+
     #| C<@.repository> stores locations of Void package repositories
     #| (prioritized).
     #|
