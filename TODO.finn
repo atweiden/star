@@ -15,6 +15,11 @@ configuration
       |
       |     # after
       |     has UserName:D $.user-name-admin is required;
+- add `--non-interactive` flag
+  - to disable tui mode
+  - implies accepting default values for any option not specified via
+    - environment variable
+    - cli
 
 development
 -----------
