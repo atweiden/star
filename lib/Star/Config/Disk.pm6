@@ -20,32 +20,28 @@ my role RootLvm
     has Star::Config::Disk::Lvm:D $.lvm is required;
 }
 
-my role Root[LvmOnRoot:D $lvm-on]
+my role Root
 {
     also does RootAttributes;
-
-    method lvm-on(--> LvmOnRoot:D) { $lvm-on }
 }
 
 class Star::Config::Disk::Root
 {...}
 
 # Disable LVM.
-role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::DISABLED]
+role Star::Config::Disk::Root::Opts[LvmOnRoot:D $ where LvmOnRoot::DISABLED]
 {
     also does RootAttributes;
     also does Star::Config::Roles::GetOpts;
 
     method Star::Config::Disk::Root(::?CLASS:D: --> Star::Config::Disk::Root:D)
     {
-        Star::Config::Disk::Root.^mixin(
-            Root[$lvm-on]
-        ).bless(|self.get-opts);
+        Star::Config::Disk::Root.^mixin(Root).bless(|self.get-opts);
     }
 }
 
 # Enable LVM. Use only with LVM-compatible C<Filesystem>s.
-role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::ENABLED]
+role Star::Config::Disk::Root::Opts[LvmOnRoot:D $ where LvmOnRoot::ENABLED]
 {
     also does RootAttributes;
     also does RootLvm;
@@ -53,10 +49,7 @@ role Star::Config::Disk::Root::Opts[LvmOnRoot:D $lvm-on where LvmOnRoot::ENABLED
 
     method Star::Config::Disk::Root(::?CLASS:D: --> Star::Config::Disk::Root:D)
     {
-        Star::Config::Disk::Root.^mixin(
-            Root[$lvm-on],
-            RootLvm
-        ).bless(|self.get-opts);
+        Star::Config::Disk::Root.^mixin(Root, RootLvm).bless(|self.get-opts);
     }
 }
 
