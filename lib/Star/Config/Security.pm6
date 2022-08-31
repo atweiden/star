@@ -204,7 +204,7 @@ class Star::Config::Security::DmCrypt::Root
 #| for passing to C<Star::Config::Security::DmCrypt::Root.new>. This is
 #| less error prone than perilously passing a C<Hash>.
 role Star::Config::Security::DmCrypt::Root::Opts[
-    BootSecurityLevel:D $ where { elevated-bootsec($_) }
+    BootSecurityLevel:D $ where .&elevated-bootsec
 ]
 {
     also does DmCryptRootVolumeAttributes;

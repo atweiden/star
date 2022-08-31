@@ -521,7 +521,7 @@ subset RelativePath of Str is export where .defined && .IO.is-relative.so;
 #| inside The Vault secret prefix where Vault secret material can reside.
 subset VaultSecretPrefix of AbsolutePath is export where
 {
-    rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-VAULT.IO;
+    .IO.&rootpart eq $Star::Constants::SECRET-PREFIX-VAULT.IO;
 }
 
 #| C<BootvaultSecretPrefix> is an absolute path (in C<Str> representation)
@@ -529,7 +529,7 @@ subset VaultSecretPrefix of AbsolutePath is export where
 #| reside.
 subset BootvaultSecretPrefix of AbsolutePath is export where
 {
-    rootpart($_.IO) eq $Star::Constants::SECRET-PREFIX-BOOTVAULT.IO;
+    .IO.&rootpart eq $Star::Constants::SECRET-PREFIX-BOOTVAULT.IO;
 }
 
 #| C<DmCryptVolumePassword> is a valid password for dm-crypt encrypted
@@ -566,16 +566,10 @@ subset Hostname of Str is export where
 }
 
 #| C<Keymap> is a keymap found in C</usr/share/kbd/keymaps>.
-subset Keymap of Str is export where
-{
-    is-keymap($_);
-}
+subset Keymap of Str is export where .&is-keymap;
 
 #| C<Locale> is a locale found in C</usr/share/i18n/locales>.
-subset Locale of Str is export where
-{
-    is-locale($_);
-}
+subset Locale of Str is export where .&is-locale;
 
 #| C<LvmVolumeGroupName> is a valid LVM volume group name.
 subset LvmVolumeGroupName of Str is export where
@@ -585,10 +579,7 @@ subset LvmVolumeGroupName of Str is export where
 
 #| C<TimeZone> is a "Region/City" in the I<tzdb> time zone descriptions
 #| file (C</usr/share/zoneinfo/zone1970.tab>), or UTC.
-subset TimeZone of Str is export where
-{
-    is-time-zone($_);
-}
+subset TimeZone of Str is export where .&is-time-zone;
 
 #| C<UserName> is a valid Linux user account name.
 subset UserName of Str is export where

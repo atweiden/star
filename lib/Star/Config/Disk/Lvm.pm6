@@ -33,7 +33,7 @@ multi sub volume-group-name(
 }
 
 multi sub volume-group-name(
-    Str:D $volume-group-name where { .so && "/dev/$_".IO.e.not },
+    Str:D $volume-group-name where .so && "/dev/$_".IO.e.not,
     UInt:D $?
     --> Str:D
 )
