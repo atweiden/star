@@ -40,12 +40,12 @@ unit module Star::Constants;
     #| descriptions.
     constant $FILE-TIME-ZONES = "$DIRECTORY-TIME-ZONES/zone1970.tab";
 
-    #| C<$SECRET-PREFIX-VAULT> is the directory in which Vault key files
-    #| and detached headers are stored.
+    #| C<$SECRET-PREFIX-VAULT> is the top-most level directory in which
+    #| Vault key files and detached headers can be stored.
     constant $SECRET-PREFIX-VAULT = '/boot';
 
-    #| C<$SECRET-PREFIX-BOOTVAULT> is the directory in which Bootvault key
-    #| files are stored.
+    #| C<$SECRET-PREFIX-BOOTVAULT> is the top-most level directory in
+    #| which Bootvault key files can be stored.
     constant $SECRET-PREFIX-BOOTVAULT = '/root';
 
 =head2 Constants for I<libcrypt>
@@ -102,10 +102,10 @@ unit module Star::Constants;
 
 =head2 Constants for I<cryptsetup>
 
-    #| C<$CRYPTSETUP-LUKS-BYTES-PER-SECTOR> is the number of bytes
-    #| per cryptsetup "sector", for use with C<--vault-offset> and
+    #| C<$CRYPTSETUP-BYTES-PER-SECTOR> is the number of bytes per
+    #| cryptsetup "sector", for use with C<--vault-offset> and
     #| C<--bootvault-offset>.
-    constant $CRYPTSETUP-LUKS-BYTES-PER-SECTOR = 512;
+    constant $CRYPTSETUP-BYTES-PER-SECTOR = 512;
 
 =head2 Constants for C<--enable-serial-console>
 

@@ -13,16 +13,17 @@ my \Utils = Star::System::Utils;
 #| =for item1
 #| C<BASE>: One or two encrypted partitions on single device - one for
 #| C</> and one for </boot>, or one shared partition for both C</> and
-#| C</boot>. When C</boot> is on a separate partition from C</>, its
-#| partition and/or C</>'s may be encrypted (see: C<DmCryptTarget>). When
-#| C</boot> is stored in the same partition as C</>, however, C</boot> is
-#| encrypted along with the rest of the system.
+#| C</boot>. When C</boot> is on a separate partition, its partition
+#| and/or C</>'s may be encrypted (see: C<DmCryptTarget>). When C</boot>
+#| is stored in the same partition as C</>, however, C</boot> is encrypted
+#| along with the rest of the system.
 #|
 #| =begin item1
 #|
-#| C<1FA>: Mostly for development purposes. Only for use with
-#| C<DiskEncryption::DM-CRYPT> (or C<DiskEncryption::DMFS>) and either
-#| C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>.
+#| C<1FA>: Mostly for development purposes. Only for use with combined
+#| settings C<DiskEncryption::DM-CRYPT> (or C<DiskEncryption::DMFS>),
+#| either C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>, and
+#| C<SecondFactor::MORT>.
 #|
 #| Two partitions on single device, one for C</> and one for C</boot>.
 #| C</boot>'s partition may or may not be encrypted, depending. C</>'s
@@ -36,34 +37,34 @@ my \Utils = Star::System::Utils;
 #| C<2FA>: Implementation depends on C<DiskEncryption>, C<DmCryptTarget>,
 #| and C<SecondFactor>.
 #|
-#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
 #| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
 #| C<SecondFactor::FIDO2>, because this would only encrypt C</boot>, and
 #| no bootloader at present is able to decrypt a dm-crypt encrypted
 #| C</boot> partition using FIDO2 during system startup. The second factor
-#| mechanism would be of no use.
+#| mechanism would be unusable.
 #|
-#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
 #| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
 #| C<SecondFactor::KEY>, because this would only encrypt C</boot>, and no
 #| bootloader at present is able to decrypt a dm-crypt encrypted C</boot>
 #| partition using an external key file during system startup. The second
-#| factor mechanism would be of no use.
+#| factor mechanism would be unusable.
 #|
-#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
 #| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
 #| C<SecondFactor::MORT>, because this would only encrypt C</boot>, and no
 #| bootloader at present is able to decrypt a headerless dm-crypt
 #| encrypted C</boot> partition during system startup.
 #|
-#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
 #| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
 #| C<SecondFactor::PKCS>, because this would only encrypt C</boot>, and no
 #| bootloader at present is able to decrypt a dm-crypt encrypted C</boot>
 #| partition using a PKCS#11-compatible security token or smart card
-#| during system startup. The second factor mechanism would be of no use.
+#| during system startup. The second factor mechanism would be unusable.
 #|
-#| C<BootSecurityLevel::<2FA>> can't be used with
+#| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
 #| C<DiskEncryption::FILESYSTEM> and C<SecondFactor::MORT>, because
 #| C<SecondFactor::MORT> requires the presence of a dm-crypt encrypted
 #| volume.

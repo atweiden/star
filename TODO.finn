@@ -30,6 +30,7 @@ development
   - rename `Mode::<1FA>`, `Mode::<2FA>` -> `Mode::ONEFA`, `Mode::TWOFA`
 - rename `Timezone $.timezone` -> `TimeZone $.time-zone`
 - rename `VaultType $.vault-type` -> `DmCryptMode ...`
+- rename `$CRYPTSETUP-LUKS-BYTES-PER-SECTOR` -> `$CRYPTSETUP-BYTES-PER-SECTOR`
 - handle new enum `Star::Types::{DriveType, Graphics, Libc, Processor, VaultType}`
 - add error handling code
   - in `lib/Star/Config/Disk.pm6`
