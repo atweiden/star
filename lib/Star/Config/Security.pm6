@@ -204,7 +204,6 @@ class Star::Config::Security::DmCrypt::Root
 #| for passing to C<Star::Config::Security::DmCrypt::Root.new>. This is
 #| less error prone than perilously passing a C<Hash>.
 role Star::Config::Security::DmCrypt::Root::Opts[
-    DiskEncryption:D $ where .&dm-crypt-encryption,
     BootSecurityLevel:D $ where .&elevated-bootsec,
     SecondFactor:D $ where SecondFactor::MORT
 ]
@@ -234,7 +233,7 @@ role Star::Config::Security::DmCrypt::Root::Opts[
 }
 
 role Star::Config::Security::DmCrypt::Root::Opts[
-    *@
+    BootSecurityLevel:D $ where BootSecurityLevel::BASE
 ]
 {
     also does DmCryptRootVolumeAttributes;
@@ -392,20 +391,10 @@ class Star::Config::Security
     multi method new(
         DiskEncryption::DM-CRYPT,
         DmCryptTarget::BOTH,
-        Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<1FA>] $r,
-        Star::Config::Security::DmCrypt::Boot::Opts $b
-        --> Star::Config::Security:D
-    )
-    {
-        my Star::Config::Security::DmCrypt $dm-crypt .=
-            new(DmCryptTarget::BOTH, $r, $b);
-        self.^mixin(SecurityDmCrypt).bless(:$dm-crypt);
-    }
-
-    multi method new(
-        DiskEncryption::DM-CRYPT,
-        DmCryptTarget::BOTH,
-        Star::Config::Security::DmCrypt::Root::Opts[BootSecurityLevel::<2FA>] $r,
+        # This covers both C<BootSecurityLevel::<2FA>> with any
+        # C<SecondFactor> variant and C<BootSecurityLevel::<1FA>>
+        # (which is only compatible with C<SecondFactor::MORT>).
+        Star::Config::Security::DmCrypt::Root::Opts $r where .&second-factor,
         Star::Config::Security::DmCrypt::Boot::Opts $b
         --> Star::Config::Security:D
     )
@@ -528,5 +517,31 @@ multi sub dm-crypt-encryption(DiskEncryption::NONE --> False) {*}
 multi sub dm-crypt-encryption(DiskEncryption::DM-CRYPT --> True) {*}
 multi sub dm-crypt-encryption(DiskEncryption::FILESYSTEM --> False) {*}
 multi sub dm-crypt-encryption(DiskEncryption::DMFS --> True) {*}
+
+multi sub second-factor(
+    Star::Config::Security::DmCrypt::Root::Opts[
+        BootSecurityLevel::<1FA>,
+        SecondFactor:D
+    ] $
+    --> True
+)
+{*}
+
+multi sub second-factor(
+    Star::Config::Security::DmCrypt::Root::Opts[
+        BootSecurityLevel::<2FA>,
+        SecondFactor:D
+    ] $
+    --> True
+)
+{*}
+
+multi sub second-factor(
+    Star::Config::Security::DmCrypt::Root::Opts[
+        BootSecurityLevel::BASE
+    ] $
+    --> False
+)
+{*}
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
