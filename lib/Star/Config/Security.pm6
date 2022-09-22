@@ -513,11 +513,6 @@ class Star::Config::Security
 
 =head2 Helper functions
 
-multi sub dm-crypt-encryption(DiskEncryption::NONE --> False) {*}
-multi sub dm-crypt-encryption(DiskEncryption::DM-CRYPT --> True) {*}
-multi sub dm-crypt-encryption(DiskEncryption::FILESYSTEM --> False) {*}
-multi sub dm-crypt-encryption(DiskEncryption::DMFS --> True) {*}
-
 multi sub second-factor(
     Star::Config::Security::DmCrypt::Root::Opts[
         BootSecurityLevel::<1FA>,
