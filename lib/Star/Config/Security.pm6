@@ -204,7 +204,9 @@ class Star::Config::Security::DmCrypt::Root
 #| for passing to C<Star::Config::Security::DmCrypt::Root.new>. This is
 #| less error prone than perilously passing a C<Hash>.
 role Star::Config::Security::DmCrypt::Root::Opts[
-    BootSecurityLevel:D $ where .&elevated-bootsec
+    DiskEncryption:D $ where .&dm-crypt-encryption,
+    BootSecurityLevel:D $ where .&elevated-bootsec,
+    SecondFactor:D $ where SecondFactor::MORT
 ]
 {
     also does DmCryptRootVolumeAttributes;
@@ -232,7 +234,7 @@ role Star::Config::Security::DmCrypt::Root::Opts[
 }
 
 role Star::Config::Security::DmCrypt::Root::Opts[
-    BootSecurityLevel:D $
+    *@
 ]
 {
     also does DmCryptRootVolumeAttributes;
@@ -519,5 +521,12 @@ class Star::Config::Security
 
     # end C<DiskEncryption::DMFS> }}}
 }
+
+=head2 Helper functions
+
+multi sub dm-crypt-encryption(DiskEncryption::NONE --> False) {*}
+multi sub dm-crypt-encryption(DiskEncryption::DM-CRYPT --> True) {*}
+multi sub dm-crypt-encryption(DiskEncryption::FILESYSTEM --> False) {*}
+multi sub dm-crypt-encryption(DiskEncryption::DMFS --> True) {*}
 
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
