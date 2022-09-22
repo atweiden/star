@@ -186,9 +186,10 @@ enum DeviceLocator is export <
 #| =for item
 #| C<DMFS>: Enable disk encryption both via the dm-crypt kernel crypto
 #| API and the filesystem's native encryption implementation. Only
-#| available for C<Filesystem::EXT4> and C<Filesystem::F2FS>. May be used
-#| to encrypt theC</boot> partition via dm-crypt while encrypting the C</>
-#| partition via the filesystem's native encryption implementation.
+#| available for C<Filesystem::EXT4> and C<Filesystem::F2FS>. May be
+#| used to encrypt the C</boot> partition via dm-crypt while encrypting
+#| the C</> partition via the filesystem's native encryption
+#| implementation.
 enum DiskEncryption is export <
     NONE
     DM-CRYPT
@@ -214,7 +215,7 @@ enum DmCryptMode is export <
 #| targets for encryption via the dm-crypt kernel crypto API.
 #|
 #| =for item
-#| C<ROOT>: Only encrypt the root volume or (or C</> partition). C</boot>
+#| C<ROOT>: Only encrypt the root volume (or C</> partition). C</boot>
 #| will be unencrypted.
 #|
 #| =for item
@@ -386,7 +387,7 @@ enum SecondFactor is export <
 >;
 
 #| C<UdevProperty> is an enum whose variants represent properties by
-#| which to lookup information stored in the udev database.
+#| which to look up information stored in the udev database.
 enum UdevProperty is export <
     DEVLINKS
     ID_SERIAL_SHORT
