@@ -14,15 +14,10 @@ my role RootAttributes
     has Star::Config::Disk::Filesystem:D $.filesystem is required;
 }
 
-my role RootLvm
+my role RootAttributesLvm
 {
     #| C<$.lvm> contains LVM settings for C</>.
     has Star::Config::Disk::Lvm:D $.lvm is required;
-}
-
-my role Root
-{
-    also does RootAttributes;
 }
 
 class Star::Config::Disk::Root
@@ -36,7 +31,9 @@ role Star::Config::Disk::Root::Opts[LvmOnRoot:D $ where LvmOnRoot::DISABLED]
 
     method Star::Config::Disk::Root(::?CLASS:D: --> Star::Config::Disk::Root:D)
     {
-        Star::Config::Disk::Root.^mixin(Root).bless(|self.get-opts);
+        Star::Config::Disk::Root.^mixin(
+            RootAttributes
+        ).bless(|self.get-opts);
     }
 }
 
@@ -44,12 +41,15 @@ role Star::Config::Disk::Root::Opts[LvmOnRoot:D $ where LvmOnRoot::DISABLED]
 role Star::Config::Disk::Root::Opts[LvmOnRoot:D $ where LvmOnRoot::ENABLED]
 {
     also does RootAttributes;
-    also does RootLvm;
+    also does RootAttributesLvm;
     also does Star::Config::Roles::GetOpts;
 
     method Star::Config::Disk::Root(::?CLASS:D: --> Star::Config::Disk::Root:D)
     {
-        Star::Config::Disk::Root.^mixin(Root, RootLvm).bless(|self.get-opts);
+        Star::Config::Disk::Root.^mixin(
+            RootAttributes,
+            RootAttributesLvm
+        ).bless(|self.get-opts);
     }
 }
 
@@ -70,7 +70,7 @@ my role BootAttributes
     has Star::Config::Disk::Filesystem:D $.filesystem is required;
 }
 
-my role BootDevice
+my role BootAttributesDevice
 {
     #| C<$.device> is the target block device for C</boot>.
     #|
@@ -78,10 +78,8 @@ my role BootDevice
     has Str:D $.device is required;
 }
 
-my role Boot[RelocateBootTo:D $location]
+my role BootLocation[RelocateBootTo:D $location]
 {
-    also does BootAttributes;
-
     method location(--> RelocateBootTo:D) { $location }
 }
 
@@ -96,14 +94,15 @@ role Star::Config::Disk::Boot::Opts[
 ]
 {
     also does BootAttributes;
-    also does BootDevice;
+    also does BootAttributesDevice;
     also does Star::Config::Roles::GetOpts;
 
     method Star::Config::Disk::Boot(::?CLASS:D: --> Star::Config::Disk::Boot:D)
     {
         Star::Config::Disk::Boot.^mixin(
-            Boot[$location],
-            BootDevice
+            BootAttributes,
+            BootAttributesDevice,
+            BootLocation[$location]
         ).bless(|self.get-opts);
     }
 }
@@ -120,7 +119,8 @@ role Star::Config::Disk::Boot::Opts[
     method Star::Config::Disk::Boot(::?CLASS:D: --> Star::Config::Disk::Boot:D)
     {
         Star::Config::Disk::Boot.^mixin(
-            Boot[$location]
+            BootAttributes,
+            BootLocation[$location]
         ).bless(|self.get-opts);
     }
 }
@@ -138,7 +138,8 @@ role Star::Config::Disk::Boot::Opts[
     method Star::Config::Disk::Boot(::?CLASS:D: --> Star::Config::Disk::Boot:D)
     {
         Star::Config::Disk::Boot.^mixin(
-            Boot[$location]
+            BootAttributes,
+            BootLocation[$location]
         ).bless(|self.get-opts);
     }
 }
@@ -302,7 +303,7 @@ class Star::Config::Disk
         Star::Config::Disk::Root::Opts:D $r,
         Star::Config::Disk::Boot::Opts:D $b,
         DiskEncryption::DM-CRYPT,
-        DmCryptTarget:D $ where .&dm-crypt-target-root-or-boot,
+        DmCryptTarget:D $ where .&dm-crypt-target-both.not,
         *@
         --> Star::Config::Disk:D
     )
@@ -355,9 +356,9 @@ class Star::Config::Disk
 
 =head2 Helper functions
 
-multi sub dm-crypt-target-root-or-boot(DmCryptTarget::ROOT --> True) {*}
-multi sub dm-crypt-target-root-or-boot(DmCryptTarget::BOOT --> True) {*}
-multi sub dm-crypt-target-root-or-boot(DmCryptTarget::BOTH --> False) {*}
+multi sub dm-crypt-target-both(DmCryptTarget::ROOT --> False) {*}
+multi sub dm-crypt-target-both(DmCryptTarget::BOOT --> False) {*}
+multi sub dm-crypt-target-both(DmCryptTarget::BOTH --> True) {*}
 
 multi sub filesystem-encryption(DiskEncryption::NONE --> False) {*}
 multi sub filesystem-encryption(DiskEncryption::DM-CRYPT --> False) {*}
