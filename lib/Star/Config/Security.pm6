@@ -43,12 +43,6 @@ my role DmCryptRootVolumeAttributes
     #| See: C<man cryptsetup>.
     has Str:D $.hash is required;
 
-    #| C<$.iter-time> is the time to spend in ms with PBKDF passphrase
-    #| processing on the dm-crypt encrypted root volume.
-    #|
-    #| See: C<man cryptsetup>.
-    has Str:D $.iter-time is required;
-
     #| C<$.key-size> is the key size in bits for the dm-crypt encrypted
     #| root volume.
     #|
@@ -73,39 +67,46 @@ my role DmCryptRootVolumeAttributes
     has Str $.sector-size;
 }
 
-my role DmCryptRootVolume[
-    #| C<$mode> is the dm-crypt encrypted root volume encryption mode.
-    #|
-    #| C<$mode> must be C<LUKS1> when C<DmCryptTarget::BOTH> and
-    #| C<BootSecurityLevel::BASE>, because GRUB is presently practically
-    #| speaking incapable of booting from volumes encrypted with any other
-    #| dm-crypt encryption mode. This isn't enforced by the type system
-    #| here, however, because even if C<DmCryptRootVolume>'s parametric
-    #| signature featured the necessary parameters C<DmCryptTarget> and
-    #| C<BootSecurityLevel> for detecting invalid configuration, invalid
-    #| attempts would merely raise the rather general exception
-    #| C<X::Role::Parametric::NoSuchCandidate>. While catching this
-    #| exception and subsequently handling it would be a viable option,
-    #| better to raise a specialized exception earlier on in the config
-    #| instantiation process.
-    DmCryptMode:D $mode
-    #= C<$mode> is assumed to be valid.
-]
+my role DmCryptRootVolumeAttributesLuks
 {
-    also does DmCryptRootVolumeAttributes;
-
-    #| C<mode> returns the dm-crypt encryption mode to be used in the
-    #| creation of the dm-crypt encrypted root volume.
-    method mode(--> DmCryptMode:D) { $mode }
+    #| C<$.iter-time> is the time to spend in ms with PBKDF passphrase
+    #| processing on the dm-crypt LUKS-encrypted root volume.
+    #|
+    #| See: C<man cryptsetup>.
+    has Str:D $.iter-time is required;
 }
 
-my role DmCryptRootVolumeHeader
+my role DmCryptRootVolumeAttributesLuksHeader
 {
-    #| C<$.header> is the path to the dm-crypt encrypted root volume
+    #| C<$.header> is the path to the dm-crypt LUKS-encrypted root volume
     #| detached header.
     #|
     #| N.B. The path must be inside of C</boot> (The Vault secret prefix).
     has DmCryptRootVolumeHeaderPath:D $.header is required;
+}
+
+my role DmCryptRootVolumeMode[
+    #| C<$mode> is the dm-crypt encrypted root volume encryption mode.
+    #|
+    #| C<$mode> must be C<LUKS1> when C<DmCryptTarget::BOTH> and
+    #| C<BootSecurityLevel::BASE>, because GRUB is presently practically
+    #| speaking incapable of booting from volumes encrypted with any
+    #| other dm-crypt encryption mode. This isn't enforced by the type
+    #| system here, however, because even if C<DmCryptRootVolumeMode>'s
+    #| parametric signature featured the necessary parameters
+    #| C<DmCryptTarget> and C<BootSecurityLevel> for detecting invalid
+    #| configuration, invalid attempts would merely raise the rather
+    #| general exception C<X::Role::Parametric::NoSuchCandidate>. While
+    #| catching this exception and subsequently handling it would be a
+    #| viable option, better to raise a specialized exception earlier
+    #| on in the config instantiation process.
+    DmCryptMode:D $mode
+    #= C<$mode> is assumed to be valid.
+]
+{
+    #| C<mode> returns the dm-crypt encryption mode to be used in the
+    #| creation of the dm-crypt encrypted root volume.
+    method mode(--> DmCryptMode:D) { $mode }
 }
 
 my role DmCryptBootVolumeAttributes
@@ -148,12 +149,6 @@ my role DmCryptBootVolumeAttributes
     #| See: C<man cryptsetup>.
     has Str:D $.hash is required;
 
-    #| C<$.iter-time> is the time to spend in ms with PBKDF passphrase
-    #| processing on the dm-crypt encrypted boot volume.
-    #|
-    #| See: C<man cryptsetup>.
-    has Str:D $.iter-time is required;
-
     #| C<$.key-size> is the key size in bits for the dm-crypt encrypted
     #| boot volume.
     #|
@@ -178,19 +173,26 @@ my role DmCryptBootVolumeAttributes
     has Str $.sector-size;
 }
 
-my role DmCryptBootVolume[
+my role DmCryptBootVolumeAttributesLuks
+{
+    #| C<$.iter-time> is the time to spend in ms with PBKDF passphrase
+    #| processing on the dm-crypt LUKS-encrypted boot volume.
+    #|
+    #| See: C<man cryptsetup>.
+    has Str:D $.iter-time is required;
+}
+
+my role DmCryptBootVolumeMode[
     #| C<$mode> is the dm-crypt encrypted boot volume encryption mode.
     #|
     #| C<$mode> must be C<LUKS1>, because GRUB is presently practically
     #| speaking incapable of booting from volumes encrypted with any other
     #| dm-crypt encryption mode. This isn't enforced by the type system
-    #| here, however, for API consistency (see: C<DmCryptRootVolume>).
+    #| here, however, for API consistency (see: C<DmCryptRootVolumeMode>).
     DmCryptMode:D $mode
     #= C<$mode> is assumed to be valid.
 ]
 {
-    also does DmCryptBootVolumeAttributes;
-
     #| C<mode> returns the dm-crypt encryption mode to be used in the
     #| creation of the dm-crypt encrypted boot volume.
     method mode(--> DmCryptMode:D) { $mode }
@@ -204,53 +206,95 @@ class Star::Config::Security::DmCrypt::Root
 #| for passing to C<Star::Config::Security::DmCrypt::Root.new>. This is
 #| less error prone than perilously passing a C<Hash>.
 role Star::Config::Security::DmCrypt::Root::Opts[
+    DmCryptMode:D $mode where .&dm-crypt-luks,
     BootSecurityLevel:D $ where .&elevated-bootsec,
     SecondFactor:D $ where SecondFactor::MORT
 ]
 {
     also does DmCryptRootVolumeAttributes;
+    also does DmCryptRootVolumeAttributesLuks;
+    also does DmCryptRootVolumeAttributesLuksHeader;
     also does Star::Config::Roles::GetOpts;
-
-    has DmCryptMode:D $.mode is required;
-
-    #| C<header> attribute required for C<BootSecurityLevel::<1FA>> and
-    #| C<BootSecurityLevel::<2FA>>.
-    has DmCryptRootVolumeHeaderPath:D $.header is required;
 
     method Star::Config::Security::DmCrypt::Root(
         ::?CLASS:D:
         --> Star::Config::Security::DmCrypt::Root:D
     )
     {
-        my %opts = self.get-opts;
-        my DmCryptMode:D $mode = %opts<mode>:delete;
         Star::Config::Security::DmCrypt::Root.^mixin(
-            DmCryptRootVolume[$mode],
+            DmCryptRootVolumeAttributes,
+            DmCryptRootVolumeAttributesLuks,
             # Detach dm-crypt encrypted root volume header.
-            DmCryptRootVolumeHeader
-        ).bless(|%opts);
+            DmCryptRootVolumeAttributesLuksHeader,
+            DmCryptRootVolumeMode[$mode]
+        ).bless(|self.get-opts);
     }
 }
 
 role Star::Config::Security::DmCrypt::Root::Opts[
+    DmCryptMode:D $mode where .&dm-crypt-luks,
+    # C<BootSecurityLevel::<1FA>> is only used with C<SecondFactor::MORT>.
+    BootSecurityLevel:D $ where BootSecurityLevel::<2FA>,
+    SecondFactor:D $
+]
+{
+    also does DmCryptRootVolumeAttributes;
+    also does DmCryptRootVolumeAttributesLuks;
+    also does Star::Config::Roles::GetOpts;
+
+    method Star::Config::Security::DmCrypt::Root(
+        ::?CLASS:D:
+        --> Star::Config::Security::DmCrypt::Root:D
+    )
+    {
+        Star::Config::Security::DmCrypt::Root.^mixin(
+            DmCryptRootVolumeAttributes,
+            DmCryptRootVolumeAttributesLuks,
+            DmCryptRootVolumeMode[$mode]
+        ).bless(|self.get-opts);
+    }
+}
+
+role Star::Config::Security::DmCrypt::Root::Opts[
+    DmCryptMode:D $mode where .&dm-crypt-luks,
     BootSecurityLevel:D $ where BootSecurityLevel::BASE
+]
+{
+    also does DmCryptRootVolumeAttributes;
+    also does DmCryptRootVolumeAttributesLuks;
+    also does Star::Config::Roles::GetOpts;
+
+    method Star::Config::Security::DmCrypt::Root(
+        ::?CLASS:D:
+        --> Star::Config::Security::DmCrypt::Root:D
+    )
+    {
+        Star::Config::Security::DmCrypt::Root.^mixin(
+            DmCryptRootVolumeAttributes,
+            DmCryptRootVolumeAttributesLuks,
+            DmCryptRootVolumeMode[$mode]
+        ).bless(|self.get-opts);
+    }
+}
+
+role Star::Config::Security::DmCrypt::Root::Opts[
+    DmCryptMode:D $mode where DmCryptMode::PLAIN,
+    BootSecurityLevel:D $,
+    SecondFactor:D $?
 ]
 {
     also does DmCryptRootVolumeAttributes;
     also does Star::Config::Roles::GetOpts;
 
-    has DmCryptMode:D $.mode is required;
-
     method Star::Config::Security::DmCrypt::Root(
         ::?CLASS:D:
         --> Star::Config::Security::DmCrypt::Root:D
     )
     {
-        my %opts = self.get-opts;
-        my DmCryptMode:D $mode = %opts<mode>:delete;
         Star::Config::Security::DmCrypt::Root.^mixin(
-            DmCryptRootVolume[$mode]
-        ).bless(|%opts);
+            DmCryptRootVolumeAttributes,
+            DmCryptRootVolumeMode[$mode]
+        ).bless(|self.get-opts);
     }
 }
 
@@ -272,22 +316,41 @@ class Star::Config::Security::DmCrypt::Boot
 #| instantiation arguments for C<Star::Config::Security::DmCrypt::Boot>,
 #| for passing to C<Star::Config::Security::DmCrypt::Boot.new>. This is
 #| less error prone than perilously passing a C<Hash>.
-role Star::Config::Security::DmCrypt::Boot::Opts
+role Star::Config::Security::DmCrypt::Boot::Opts[
+    DmCryptMode:D $mode where .&dm-crypt-luks
+]
 {
     also does DmCryptBootVolumeAttributes;
-
-    has DmCryptMode:D $.mode is required;
+    also does DmCryptBootVolumeAttributesLuks;
 
     method Star::Config::Security::DmCrypt::Boot(
         ::?CLASS:D:
         --> Star::Config::Security::DmCrypt::Boot:D
     )
     {
-        my %opts = self.get-opts;
-        my DmCryptMode:D $mode = %opts<mode>:delete;
         Star::Config::Security::DmCrypt::Boot.^mixin(
-            DmCryptBootVolume[$mode]
-        ).bless(|%opts);
+            DmCryptBootVolumeAttributes
+            DmCryptBootVolumeAttributesLuks
+            DmCryptBootVolumeMode[$mode]
+        ).bless(|self.get-opts);
+    }
+}
+
+role Star::Config::Security::DmCrypt::Boot::Opts[
+    DmCryptMode:D $mode where DmCryptMode::PLAIN
+]
+{
+    also does DmCryptBootVolumeAttributes;
+
+    method Star::Config::Security::DmCrypt::Boot(
+        ::?CLASS:D:
+        --> Star::Config::Security::DmCrypt::Boot:D
+    )
+    {
+        Star::Config::Security::DmCrypt::Boot.^mixin(
+            DmCryptBootVolumeAttributes
+            DmCryptBootVolumeMode[$mode]
+        ).bless(|self.get-opts);
     }
 }
 
@@ -512,6 +575,10 @@ class Star::Config::Security
 }
 
 =head2 Helper functions
+
+multi sub dm-crypt-luks(DmCryptMode::LUKS1 --> True) {*}
+multi sub dm-crypt-luks(DmCryptMode::LUKS2 --> True) {*}
+multi sub dm-crypt-luks(DmCryptMode::PLAIN --> False) {*}
 
 multi sub second-factor(
     Star::Config::Security::DmCrypt::Root::Opts[

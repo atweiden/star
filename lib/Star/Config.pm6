@@ -102,8 +102,10 @@ sub new-security(--> Star::Config::Security:D)
         my Str:D $hash = 'hash';
         my Str:D $iter-time = 'iter-time';
         my Str:D $key-size = 'key-size';
-        Star::Config::Security::DmCrypt::Root::Opts[$boot-security-level].new(
-            :$mode,
+        Star::Config::Security::DmCrypt::Root::Opts[
+            $mode,
+            $boot-security-level
+        ].new(
             :$name,
             :$key-file,
             :$cipher,
