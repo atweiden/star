@@ -329,8 +329,8 @@ role Star::Config::Security::DmCrypt::Boot::Opts[
     )
     {
         Star::Config::Security::DmCrypt::Boot.^mixin(
-            DmCryptBootVolumeAttributes
-            DmCryptBootVolumeAttributesLuks
+            DmCryptBootVolumeAttributes,
+            DmCryptBootVolumeAttributesLuks,
             DmCryptBootVolumeMode[$mode]
         ).bless(|self.get-opts);
     }
@@ -348,7 +348,7 @@ role Star::Config::Security::DmCrypt::Boot::Opts[
     )
     {
         Star::Config::Security::DmCrypt::Boot.^mixin(
-            DmCryptBootVolumeAttributes
+            DmCryptBootVolumeAttributes,
             DmCryptBootVolumeMode[$mode]
         ).bless(|self.get-opts);
     }
