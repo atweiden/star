@@ -582,6 +582,7 @@ multi sub dm-crypt-luks(DmCryptMode::PLAIN --> False) {*}
 
 multi sub second-factor(
     Star::Config::Security::DmCrypt::Root::Opts[
+        Mode:D,
         BootSecurityLevel::<1FA>,
         SecondFactor:D
     ] $
@@ -591,6 +592,7 @@ multi sub second-factor(
 
 multi sub second-factor(
     Star::Config::Security::DmCrypt::Root::Opts[
+        Mode:D,
         BootSecurityLevel::<2FA>,
         SecondFactor:D
     ] $
@@ -600,6 +602,7 @@ multi sub second-factor(
 
 multi sub second-factor(
     Star::Config::Security::DmCrypt::Root::Opts[
+        Mode:D,
         BootSecurityLevel::BASE
     ] $
     --> False
