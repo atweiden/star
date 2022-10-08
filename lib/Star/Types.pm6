@@ -12,11 +12,11 @@ my \Utils = Star::System::Utils;
 #|
 #| =for item1
 #| C<BASE>: One or two encrypted partitions on single device - one for
-#| C</> and one for </boot>, or one shared partition for both C</> and
-#| C</boot>. When C</boot> is on a separate partition, its partition
-#| and/or C</>'s may be encrypted (see: C<DmCryptTarget>). When C</boot>
-#| is stored in the same partition as C</>, however, C</boot> is encrypted
-#| along with the rest of the system.
+#| C</> and one for </boot>, or one for both C</> and C</boot>. When
+#| C</boot> is on a separate partition, its partition and/or C</>'s may
+#| be encrypted (see: C<DmCryptTarget>). When C</boot> is stored in the
+#| same partition as C</>, however, C</boot> is encrypted along with
+#| the rest of the system.
 #|
 #| =begin item1
 #|
@@ -29,7 +29,7 @@ my \Utils = Star::System::Utils;
 #| Two partitions on single device, one for C</> and one for C</boot>.
 #| C</boot>'s partition may or may not be encrypted, depending. C</>'s
 #| partition is encrypted and headerless, its header detached and stored
-#| in C</boot>'s partition as applicable.
+#| in the C</boot> partition.
 #|
 #| =end item1
 #|
@@ -90,7 +90,7 @@ my \Utils = Star::System::Utils;
 #| storage drive acts as the second factor. The C</boot> partition is
 #| stored in the external storage drive either encrypted or unencrypted,
 #| depending. The root volume is encrypted and headerless, its header
-#| detached and stored in the C</boot> partition as applicable.
+#| detached and stored in the C</boot> partition.
 #|
 #| =for item2
 #| With C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::ROOT> (or
@@ -128,9 +128,9 @@ my \Utils = Star::System::Utils;
 #| C<DmCryptMode::LUKS2>, depending), C<DmCryptTarget::ROOT> (or
 #| C<DmCryptTarget::BOTH>) and C<SecondFactor::MORT>: An external storage
 #| drive acts as the second factor. The C</boot> partition is stored in
-#| the external storage drive either encrypted or unencrypted,
-#| depending. The root volume is encrypted and headerless, its header
-#| detached and stored in the C</boot> partition as applicable.
+#| the external storage drive either encrypted or unencrypted, depending.
+#| The root volume is encrypted and headerless, its header detached and
+#| stored in the C</boot> partition.
 #|
 #| =for item2
 #| With C<DiskEncryption::DMFS>, C<DmCryptTarget::ROOT> (or
@@ -220,8 +220,8 @@ enum DmCryptMode is export <
 #| targets for encryption via the dm-crypt kernel crypto API.
 #|
 #| =for item
-#| C<ROOT>: Only encrypt the root volume (or C</> partition). C</boot>
-#| will be unencrypted.
+#| C<ROOT>: Only encrypt the root volume (or C</> partition). The C</boot>
+#| partition will be unencrypted.
 #|
 #| =for item
 #| C<BOOT>: Only encrypt the C</boot> partition. The C</> partition will
@@ -229,12 +229,12 @@ enum DmCryptMode is export <
 #|
 #| =for item
 #| C<BOTH>: Encrypt both the root volume (or C</> partition) in addition
-#| to C</boot>. C</boot> may or may not reside on a separate partition
-#| (see: C<BootSecurityLevel>).
+#| to C</boot>. C</boot> may or may not reside on a separate partition,
+#| depending.
 #|
-#| N.B. C<BOOT> and C<BOTH> require selecting the GRUB bootloader.
-#| Currently, no other bootloader supports booting from an encrypted
-#| C</boot>.
+#| N.B. C<DmCryptTarget::BOOT> and C<DmCryptTarget::BOTH> require
+#| selecting the GRUB bootloader. Currently, no other bootloader supports
+#| booting from an encrypted C</boot>.
 enum DmCryptTarget is export <
     ROOT
     BOOT
