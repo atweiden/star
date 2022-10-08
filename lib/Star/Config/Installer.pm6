@@ -17,4 +17,9 @@ has AbsolutePath:D $.chroot-dir is required;
 #| On Arch, use C<arch-chroot> from the C<arch-install-scripts> package.
 has Bool:D $.augment is required;
 
+
+#| C<@.package> contains packages for the installer to install in addition
+#| to the minimal default set.
+has Str:D @.package is required;
+
 # vim: set filetype=raku foldmethod=marker foldlevel=0:
