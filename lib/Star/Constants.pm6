@@ -9,8 +9,7 @@ unit module Star::Constants;
 #| L<XDG Base Directory Specification|https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html>
 #| - "the base directory relative to which user-specific data files should
 #| be stored".
-my constant $DIRECTORY-XDG-DATA =
-    $*ENV<XDG_DATA_HOME> // "$*HOME/.local/share";
+my constant $DIRECTORY-XDG-DATA = $*ENV<XDG_DATA_HOME> // "$*HOME/.local/share";
 
 #| C<$DIRECTORY-STAR-DATA> is the directory in which Star persists data
 #| between runs.
