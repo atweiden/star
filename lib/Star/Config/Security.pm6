@@ -82,7 +82,7 @@ my role DmCryptRootVolumeAttributesLuksHeader
     #| detached header.
     #|
     #| N.B. The path must be inside of C</boot> (The Vault secret prefix).
-    has DmCryptRootVolumeHeaderPath:D $.header is required;
+    has DmCryptRootVolumeLuksHeaderPath:D $.header is required;
 }
 
 my role DmCryptRootVolumeMode[
@@ -224,7 +224,7 @@ role Star::Config::Security::DmCrypt::Root::Opts[
         Star::Config::Security::DmCrypt::Root.^mixin(
             DmCryptRootVolumeAttributes,
             DmCryptRootVolumeAttributesLuks,
-            # Detach dm-crypt encrypted root volume header.
+            # Detach dm-crypt LUKS-encrypted root volume header.
             DmCryptRootVolumeAttributesLuksHeader,
             DmCryptRootVolumeMode[$mode]
         ).bless(|self.get-opts);
@@ -537,7 +537,7 @@ class Star::Config::Security
 
     # A separate C</boot> partition is needed for C<DiskEncryption::DMFS>
     # plus C<DmCryptTarget::ROOT>, but it won't be encrypted. Hence, we
-    # don't want C<Star::Config::Security::DmCrypt::Boot::Opts>.
+    # don't want C<Star::Config::Security::DmCrypt::Boot::Opts>, here.
     multi method new(
         DiskEncryption::DMFS,
         DmCryptTarget::ROOT,

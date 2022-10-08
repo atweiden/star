@@ -134,8 +134,8 @@ sub new-system(--> Star::Config::System:D)
     my Locale:D $locale = 'en_US';
     my Processor:D $processor = Processor::INTEL;
     my TimeZone:D $time-zone = 'America/Vancouver';
-    my Bool:D $disable-ipv6  = False;
-    my Bool:D $enable-classic-ifnames  = False;
+    my Bool:D $disable-ipv6 = False;
+    my Bool:D $enable-classic-ifnames = False;
     my Bool:D $enable-serial-console = False;
     Star::Config::System.new(
         :$drive-type,

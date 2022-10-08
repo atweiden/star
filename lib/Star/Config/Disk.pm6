@@ -211,27 +211,15 @@ my role DiskBoot
 #|
 #| =begin item
 #|
-#| dm-crypt encryption is used for encrypting the C</> and C</boot>
-#| filesystems together with C<BootSecurityLevel::<1FA>>. This entails
-#| storing the dm-crypt encrypted root volume's detached header in a
-#| separate boot partition.
+#| dm-crypt LUKS encryption is used for encrypting both the C</>
+#| and C</boot> filesystems together with C<BootSecurityLevel::<1FA>>
+#| (or C<BootSecurityLevel::<2FA>>) and C<SecondFactor::MORT>. This
+#| entails storing the dm-crypt LUKS-encrypted root volume's detached
+#| header in a separate boot partition.
 #|
 #|     DiskEncryption::DM-CRYPT
 #|         && DmCryptTarget::BOTH
-#|         && BootSecurityLevel::<1FA>
-#|
-#| =end item
-#|
-#| =begin item
-#|
-#| dm-crypt encryption is used for encrypting both the C</> and C</boot>
-#| filesystems together with C<BootSecurityLevel::<2FA>> and
-#| C<SecondFactor::MORT>. This entails storing the dm-crypt encrypted root
-#| volume's detached header in a separate boot partition.
-#|
-#|     DiskEncryption::DM-CRYPT
-#|         && DmCryptTarget::BOTH
-#|         && BootSecurityLevel::<2FA>
+#|         && (BootSecurityLevel::<1FA> || BootSecurityLevel::<2FA>)
 #|         && SecondFactor::MORT
 #|
 #| =end item

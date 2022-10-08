@@ -22,7 +22,8 @@ my \Utils = Star::System::Utils;
 #|
 #| C<1FA>: Mostly for development purposes. Only for use with combined
 #| settings C<DiskEncryption::DM-CRYPT> (or C<DiskEncryption::DMFS>),
-#| either C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>, and
+#| C<DmCryptMode::LUKS1> (or C<DmCryptMode::LUKS2>, depending), either
+#| C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>, and
 #| C<SecondFactor::MORT>.
 #|
 #| Two partitions on single device, one for C</> and one for C</boot>.
@@ -34,8 +35,8 @@ my \Utils = Star::System::Utils;
 #|
 #| =begin item1
 #|
-#| C<2FA>: Implementation depends on C<DiskEncryption>, C<DmCryptTarget>,
-#| and C<SecondFactor>.
+#| C<2FA>: Implementation depends on C<DiskEncryption>, C<DmCryptMode>,
+#| C<DmCryptTarget>, and C<SecondFactor>.
 #|
 #| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
 #| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
@@ -51,11 +52,12 @@ my \Utils = Star::System::Utils;
 #| partition using an external key file during system startup. The second
 #| factor mechanism would be unusable.
 #|
-#| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
-#| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
-#| C<SecondFactor::MORT>, because this would only encrypt C</boot>, and no
-#| bootloader at present is able to decrypt a headerless dm-crypt
-#| encrypted C</boot> partition during system startup.
+#| C<BootSecurityLevel::<2FA>> can't be used with the combined
+#| settings C<DiskEncryption::DM-CRYPT>, C<DmCryptMode::LUKS1> (or
+#| C<DmCryptMode::LUKS2>), C<DmCryptTarget::BOOT> and
+#| C<SecondFactor::MORT>, because this would only encrypt C</boot>,
+#| and no bootloader at present is able to decrypt a headerless dm-crypt
+#| LUKS-encrypted C</boot> partition during system startup.
 #|
 #| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
 #| C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::BOOT> and
@@ -64,10 +66,10 @@ my \Utils = Star::System::Utils;
 #| partition using a PKCS#11-compatible security token or smart card
 #| during system startup. The second factor mechanism would be unusable.
 #|
-#| C<BootSecurityLevel::<2FA>> can't be used with the combined settings
-#| C<DiskEncryption::FILESYSTEM> and C<SecondFactor::MORT>, because
-#| C<SecondFactor::MORT> requires the presence of a dm-crypt encrypted
-#| volume.
+#| C<BootSecurityLevel::<2FA>> can't be used with the combined
+#| settings C<DiskEncryption::FILESYSTEM> and C<SecondFactor::MORT>,
+#| because C<SecondFactor::MORT> requires the presence of a dm-crypt
+#| LUKS-encrypted volume.
 #|
 #| =end item1
 #|
@@ -82,12 +84,13 @@ my \Utils = Star::System::Utils;
 #| external storage drive decrypts the dm-crypt encrypted root volume.
 #|
 #| =for item2
-#| With C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::ROOT> (or
-#| C<DmCryptTarget::BOTH>) and C<SecondFactor::MORT>: An external storage
-#| drive acts as the second factor. The C</boot> partition is stored in
-#| the external storage drive either encrypted or unencrypted, depending.
-#| The root volume is encrypted and headerless, its header detached and
-#| stored in the C</boot> partition as applicable.
+#| With C<DiskEncryption::DM-CRYPT>, C<DmCryptMode::LUKS1>
+#| (or C<DmCryptMode::LUKS2>, depending), C<DmCryptTarget::ROOT>
+#| (or C<DmCryptTarget::BOTH>) and C<SecondFactor::MORT>: An external
+#| storage drive acts as the second factor. The C</boot> partition is
+#| stored in the external storage drive either encrypted or unencrypted,
+#| depending. The root volume is encrypted and headerless, its header
+#| detached and stored in the C</boot> partition as applicable.
 #|
 #| =for item2
 #| With C<DiskEncryption::DM-CRYPT>, C<DmCryptTarget::ROOT> (or
@@ -121,12 +124,13 @@ my \Utils = Star::System::Utils;
 #| and the root filesystem.
 #|
 #| =for item2
-#| With C<DiskEncryption::DMFS>, C<DmCryptTarget::ROOT> (or
+#| With C<DiskEncryption::DMFS>, C<DmCryptMode::LUKS1> (or
+#| C<DmCryptMode::LUKS2>, depending), C<DmCryptTarget::ROOT> (or
 #| C<DmCryptTarget::BOTH>) and C<SecondFactor::MORT>: An external storage
 #| drive acts as the second factor. The C</boot> partition is stored in
-#| the external storage drive either encrypted or unencrypted, depending.
-#| The root volume is encrypted and headerless, its header detached and
-#| stored in the C</boot> partition as applicable.
+#| the external storage drive either encrypted or unencrypted,
+#| depending. The root volume is encrypted and headerless, its header
+#| detached and stored in the C</boot> partition as applicable.
 #|
 #| =for item2
 #| With C<DiskEncryption::DMFS>, C<DmCryptTarget::ROOT> (or
@@ -372,8 +376,8 @@ enum RelocateBootTo is export <
 #| you know.>
 #|
 #| =for item
-#| C<MORT>: Decrypt dm-crypt encrypted volume with detached header stored
-#| on C</boot> partition in external storage drive.
+#| C<MORT>: Decrypt dm-crypt LUKS-encrypted volume with detached header
+#| stored on C</boot> partition in external storage drive.
 #|
 #| =for item
 #| C<PKCS>: Decrypt C</> partition with PKCS#11-compatible security token
@@ -414,7 +418,7 @@ my grammar TypesSubsetsGrammar
         <+lower +[_]>
     }
 
-    # C<device-name> matches a valid block device name.
+    #| C<device-name> matches a valid block device name.
     token device-name
     {
         # Just guessing here.
@@ -539,20 +543,18 @@ subset BootvaultSecretPrefix of AbsolutePath is export where
 subset DmCryptVolumePassword of Str is export where { 0 < .chars <= 512 };
 
 #| C<DmCryptRootVolumeHeaderPath> is a type alias to C<VaultSecretPrefix>.
-#| It exists to ensure the dm-crypt encrypted root volume detached header
-#| resides within The Vault secret prefix.
-subset DmCryptRootVolumeHeaderPath of VaultSecretPrefix is export;
+#| It exists to ensure the dm-crypt LUKS-encrypted root volume detached
+#| header resides within The Vault secret prefix.
+subset DmCryptRootVolumeLuksHeaderPath of VaultSecretPrefix is export;
 
 #| C<DmCryptRootVolumeKeyFilePath> is a type alias to
-#| C<VaultSecretPrefix>. It exists to ensure the dm-crypt encrypted root
-#| volume key file - for double password entry avoidance on system
-#| startup - resides within The Vault secret prefix.
+#| C<VaultSecretPrefix>. It exists to ensure the dm-crypt encrypted
+#| root volume key file resides within The Vault secret prefix.
 subset DmCryptRootVolumeKeyFilePath of VaultSecretPrefix is export;
 
 #| C<DmCryptBootVolumeKeyFilePath> is a type alias to
-#| C<BootvaultSecretPrefix>. It exists to ensure the dm-crypt
-#| encrypted boot volume key file resides within The Bootvault
-#| secret prefix.
+#| C<BootvaultSecretPrefix>. It exists to ensure the dm-crypt encrypted
+#| boot volume key file resides within The Bootvault secret prefix.
 subset DmCryptBootVolumeKeyFilePath of BootvaultSecretPrefix is export;
 
 #| C<DeviceName> is a valid device mapper name for encrypted volumes.
