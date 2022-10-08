@@ -31,9 +31,7 @@ role Star::Config::Disk::Root::Opts[LvmOnRoot:D $ where LvmOnRoot::DISABLED]
 
     method Star::Config::Disk::Root(::?CLASS:D: --> Star::Config::Disk::Root:D)
     {
-        Star::Config::Disk::Root.^mixin(
-            RootAttributes
-        ).bless(|self.get-opts);
+        Star::Config::Disk::Root.^mixin(RootAttributes).bless(|self.get-opts);
     }
 }
 
