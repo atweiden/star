@@ -9,13 +9,13 @@ unit class Star::System::Utils;
 
 #| C<ls-keymaps> returns an C<Array> of keymaps installed, in C<Str>
 #| representation.
+#|
+#| Equivalent to C<localectl list-keymaps --no-pager>. See:
+#| C<src/basic/def.h> in I<systemd> source code.
 method ls-keymaps(--> Array[Str:D])
 {
     my constant $DIRECTORY-KEYMAPS = $Star::Constants::DIRECTORY-KEYMAPS;
 
-    # Equivalent to C<localectl list-keymaps --no-pager>.
-    #
-    # See: C<src/basic/def.h> in I<systemd> source code
     state Str:D @keymap = do {
         my Str:D @path =
             # Filter out the C</usr/share/kbd/keymaps/include> directory.
@@ -58,11 +58,11 @@ multi sub ls-locales(
 
 #| C<ls-time-zones> returns a list of valid time zones, in C<Str>
 #| representation.
+#|
+#| Equivalent to C<timedatectl list-timezones --no-pager>. See:
+#| C<src/basic/time-util.c> in I<systemd> source code.
 method ls-time-zones(--> Array[Str:D])
 {
-    # Equivalent to C<timedatectl list-timezones --no-pager>.
-    #
-    # See: C<src/basic/time-util.c> in I<systemd> source code.
     state Str:D @time-zone = do {
         my Str:D @time-zone =
             $Star::Constants::FILE-TIME-ZONES

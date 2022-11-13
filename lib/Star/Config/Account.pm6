@@ -33,12 +33,12 @@ has Str:D $.user-pass-hash-sftp is required;
 #| C<$.user-pass-hash-root> is the SHA512 password hash for root.
 has Str:D $.user-pass-hash-root is required;
 
-#| C<$.user-name-grub> is the name for the "GRUB superuser". The GRUB
-#| superuser isn't a real user account. C<$.user-name-grub> is an
+#| C<$.user-name-grub> is the name for the "GRUB superuser". The
+#| GRUB superuser isn't a real user account. C<$.user-name-grub> is an
 #| arbitrary name to be entered along with an arbitrary password for GRUB
-#| authentication. Following successful authentication with GRUB, the GRUB
-#| superuser can edit GRUB menu entries or access the GRUB command
-#| console.
+#| authentication at the GRUB menu on system startup. Following successful
+#| authentication with GRUB, the GRUB superuser can edit GRUB menu
+#| entries or access the GRUB command console.
 has UserName:D $.user-name-grub is required;
 
 #| C<$.user-pass-hash-grub> is the PBKDF2 password hash for the GRUB

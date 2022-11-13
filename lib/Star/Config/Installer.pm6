@@ -1,5 +1,9 @@
 use v6;
 use Star::Types;
+
+#| C<Star::Config::Installer> encapsulates cross-distro installer
+#| settings, i.e. attributes which customize the behaviour of the
+#| installer irrespective of the distro being installed.
 unit class Star::Config::Installer;
 
 #| C<$.chroot-dir> contains the absolute path within which to perform
@@ -14,9 +18,9 @@ has AbsolutePath:D $.chroot-dir is required;
 #| On Void, the included utility C<void-chroot> can be used to quickly
 #| chroot into the new system.
 #|
-#| On Arch, use C<arch-chroot> from the C<arch-install-scripts> package.
+#| On Arch, C<arch-chroot> from the C<arch-install-scripts> package can
+#| be used to quickly chroot into the new system.
 has Bool:D $.augment is required;
-
 
 #| C<@.package> contains packages for the installer to install in addition
 #| to the minimal default set.

@@ -11,12 +11,13 @@ my \Utils = Star::System::Utils;
 #| boot security levels supported by Star.
 #|
 #| =for item1
-#| C<BASE>: One or two encrypted partitions on single device - one for
-#| C</> and one for </boot>, or one for both C</> and C</boot>. When
-#| C</boot> is on a separate partition, its partition and/or C</>'s may
-#| be encrypted (see: C<DmCryptTarget>). When C</boot> is stored in the
-#| same partition as C</>, however, C</boot> is encrypted along with
-#| the rest of the system.
+#| C<BASE>: One or two encrypted partitions on single device - one
+#| partitionfor C</> and a separate partition for </boot>, or a single
+#| partition containing both C</> and C</boot>. When C</boot> is kept
+#| on a separate partition from C</>, C<boot>'s partition and/or C</>'s
+#| partition may be encrypted (see: C<DmCryptTarget>). When C</boot>
+#| is stored in the same partition as C</>, however, C</boot> is encrypted
+#| along with the rest of the system.
 #|
 #| =begin item1
 #|
@@ -26,10 +27,10 @@ my \Utils = Star::System::Utils;
 #| C<DmCryptTarget::ROOT> or C<DmCryptTarget::BOTH>, and
 #| C<SecondFactor::MORT>.
 #|
-#| Two partitions on single device, one for C</> and one for C</boot>.
-#| C</boot>'s partition may or may not be encrypted, depending. C</>'s
-#| partition is encrypted and headerless, its header detached and stored
-#| in the C</boot> partition.
+#| Two partitions on single device, one partition for C</> and a separate
+#| partition for C</boot>. C</boot>'s partition may or may not be
+#| encrypted, depending. C</>'s partition is encrypted and headerless,
+#| its header detached and stored in the C</boot> partition.
 #|
 #| =end item1
 #|

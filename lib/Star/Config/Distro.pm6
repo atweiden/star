@@ -1,6 +1,8 @@
 use v6;
 use Star::Types;
 
+#| C<Star::Config::Distro> contains distro-specific settings.
+
 my role Variant[Distro:D $distro]
 {
     method variant(--> Distro:D) { $distro }
@@ -37,10 +39,10 @@ role Star::Config::Distro[Distro:D $ where Distro::VOID]
     #| or URLs to Void package repositories.
     #|
     #| When this attribute contains valid Void package repository paths
-    #| or URLs, they will be passed I<ahead> of any other Void package
-    #| repositories, including defaults defined by the installer in
-    #| addition to Void package repositories configured in system
-    #| settings, i.e.
+    #| or URLs, they will be passed to C<xbps-install> I<ahead> of any
+    #| other Void package repositories, including defaults defined by
+    #| the installer in addition to Void package repositories configured
+    #| in system settings, i.e.
     #|
     #|      xbps-install --repository=@.repository[0] --repository=@.repository[1]...
     #|

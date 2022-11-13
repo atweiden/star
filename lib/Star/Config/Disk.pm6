@@ -124,8 +124,8 @@ role Star::Config::Disk::Boot::Opts[
 }
 
 # Useful if filesystem formats for C</> and C</boot> differ, and LVM is
-# enabled. In which case, the C</boot> filesystem is created on an LVM
-# logical volume, rather than on a separate partition.
+# enabled. In which case, the C</boot> filesystem is created on a separate
+# LVM logical volume, rather than on a separate partition.
 role Star::Config::Disk::Boot::Opts[
     RelocateBootTo:D $location where RelocateBootTo::LVM-LOGICAL-VOLUME
 ]

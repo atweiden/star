@@ -1,5 +1,9 @@
 use v6;
 use Star::Types;
+
+#| C<Star::Config::System> encapsulates configuration values pertaining
+#| to cross-distro system settings. Typically, applying these settings
+#| entails modifying system configuration files on disk.
 unit class Star::Config::System;
 
 #| C<$.drive-type> is the type of hard drive, e.g. SSD or HDD.

@@ -1,6 +1,9 @@
 use v6;
 use Star::Types;
 
+#| C<Star::Config::Software> contains distro-specific settings for
+#| software to be installed.
+
 # nyi
 role Star::Config::Software[Distro:D $ where Distro::ALPINE]
 {*}

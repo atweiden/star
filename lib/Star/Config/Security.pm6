@@ -90,16 +90,16 @@ my role DmCryptRootVolumeMode[
     #|
     #| C<$mode> must be C<LUKS1> when C<DmCryptTarget::BOTH> and
     #| C<BootSecurityLevel::BASE>, because GRUB is presently practically
-    #| speaking incapable of booting from volumes encrypted with any
-    #| other dm-crypt encryption mode. This isn't enforced by the type
-    #| system here, however, because even if C<DmCryptRootVolumeMode>'s
+    #| speaking incapable of booting from volumes encrypted with any other
+    #| dm-crypt encryption mode. N<This isn't enforced by the type system
+    #| here, however, because even if C<DmCryptRootVolumeMode>'s
     #| parametric signature featured the necessary parameters
     #| C<DmCryptTarget> and C<BootSecurityLevel> for detecting invalid
     #| configuration, invalid attempts would merely raise the rather
     #| general exception C<X::Role::Parametric::NoSuchCandidate>. While
     #| catching this exception and subsequently handling it would be a
     #| viable option, better to raise a specialized exception earlier
-    #| on in the config instantiation process.
+    #| on in the config instantiation process.>
     DmCryptMode:D $mode
     #= C<$mode> is assumed to be valid.
 ]
@@ -118,8 +118,7 @@ my role DmCryptBootVolumeAttributes
     #|
     #|     qqx{cryptsetup luksOpen /dev/sda3 $.name}
     #|
-    #| It's recorded in important system settings files, such as
-    #| C</etc/crypttab>.
+    #| It's recorded in C</etc/crypttab>.
     has DeviceName:D $.name is required;
 
     #| C<$.pass> is the password for the dm-crypt encrypted boot volume.
@@ -536,8 +535,9 @@ class Star::Config::Security
     }
 
     # A separate C</boot> partition is needed for C<DiskEncryption::DMFS>
-    # plus C<DmCryptTarget::ROOT>, but it won't be encrypted. Hence, we
-    # don't want C<Star::Config::Security::DmCrypt::Boot::Opts>, here.
+    # plus C<DmCryptTarget::ROOT>, but it won't be dm-crypt encrypted.
+    # Hence, we don't want C<Star::Config::Security::DmCrypt::Boot::Opts>,
+    # here.
     multi method new(
         DiskEncryption::DMFS,
         DmCryptTarget::ROOT,
