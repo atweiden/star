@@ -12,7 +12,7 @@ my \Utils = Star::System::Utils;
 #|
 #| =for item1
 #| C<BASE>: One or two encrypted partitions on single device - one
-#| partitionfor C</> and a separate partition for </boot>, or a single
+#| partition for C</> and a separate partition for </boot>, or a single
 #| partition containing both C</> and C</boot>. When C</boot> is kept
 #| on a separate partition from C</>, C<boot>'s partition and/or C</>'s
 #| partition may be encrypted (see: C<DmCryptTarget>). When C</boot>
