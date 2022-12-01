@@ -56,6 +56,9 @@ detached and stored in encrypted boot volume on separate device, root
 volume LVM logical volumes formatted NILFS2, boot volume formatted Ext2.
 
 ```bash
+# --second-factor defaults to "mort"
+star --second-factor=mort new arch vault 2fa nilfs2/ext2+lvm
+# or, equivalently:
 star new arch vault 2fa nilfs2/ext2+lvm
 ```
 
